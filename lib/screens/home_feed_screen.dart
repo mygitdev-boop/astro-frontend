@@ -437,8 +437,9 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
               spacing: 8,
               runSpacing: 8,
               children: categories.keys.map((category) {
+                final label = categories[category]?['label'] ?? category;
                 return ActionChip(
-                  label: Text(category[0].toUpperCase() + category.substring(1)),
+                  label: Text(label),
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => ChatScreen(initialCategory: category)),

@@ -47,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadQuickQuestions() async {
     try {
-      final result = await ApiService.getQuickQuestions();
+      final result = await ApiService.getQuickQuestions(language: UserSession.languagePref);
       setState(() => _quickQuestions = result);
     } catch (_) {
       // Non-critical -- chat still works without the quick-question chips
@@ -170,7 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final categoryQuestions = _selectedCategory != null
-        ? (_quickQuestions[_selectedCategory] as List<dynamic>? ?? [])
+        ? ((_quickQuestions[_selectedCategory]?['questions']) as List<dynamic>? ?? [])
         : <dynamic>[];
 
     return Scaffold(
@@ -230,8 +230,9 @@ class _ChatScreenState extends State<ChatScreen> {
           spacing: 8,
           runSpacing: 8,
           children: _quickQuestions.keys.map((cat) {
+            final label = _quickQuestions[cat]?['label'] ?? cat;
             return ChoiceChip(
-              label: Text(cat[0].toUpperCase() + cat.substring(1)),
+              label: Text(label),
               selected: _selectedCategory == cat,
               onSelected: (_) => setState(() => _selectedCategory = cat),
             );

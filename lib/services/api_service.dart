@@ -208,8 +208,9 @@ class ApiService {
 
   // ---- Chat ----
 
-  static Future<Map<String, dynamic>> getQuickQuestions() async {
-    final res = await http.get(_base.replace(path: '/quick-questions'));
+  static Future<Map<String, dynamic>> getQuickQuestions({String language = 'en'}) async {
+    final uri = _base.replace(path: '/quick-questions', queryParameters: {'language': language});
+    final res = await http.get(uri);
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
