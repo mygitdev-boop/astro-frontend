@@ -2,12 +2,26 @@ import 'package:flutter/material.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'onboarding_screen.dart';
+import 'birth_details_screen.dart';
 
 /// Basic profile screen. Covers the core items from the screen spec
 /// (name, birth details summary, language, logout); subscription status,
 /// saved reports, and settings are flagged as backlog below.
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Future<void> _openBirthDetails() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const BirthDetailsScreen()),
+    );
+    if (result == true) setState(() {}); // refresh to show the new moon sign
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +74,12 @@ class ProfileScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.auto_stories_outlined),
                   title: const Text('Moon sign (Rashi)'),
-                  trailing: Text(UserSession.moonSignRashi ?? '--'),
+                  trailing: UserSession.moonSignRashi != null
+                      ? Text(UserSession.moonSignRashi!)
+                      : TextButton(
+                          onPressed: _openBirthDetails,
+                          child: const Text('Generate kundli'),
+                        ),
                 ),
                 const Divider(height: 1),
                 const ListTile(

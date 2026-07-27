@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
+import 'birth_details_screen.dart';
 
 class KundliScreen extends StatefulWidget {
   const KundliScreen({super.key});
@@ -15,6 +16,7 @@ class _KundliScreenState extends State<KundliScreen> {
   String? _explanation;
   bool _loading = true;
   String? _error;
+  bool _needsKundli = false;
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _KundliScreenState extends State<KundliScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _needsKundli = false;
     });
     try {
       final results = await Future.wait([
@@ -36,11 +39,25 @@ class _KundliScreenState extends State<KundliScreen> {
         _chart = results[0]['chart_json'];
         _explanation = results[1]['explanation'];
       });
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) {
+        setState(() => _needsKundli = true);
+      } else {
+        setState(() => _error = e.message);
+      }
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _openBirthDetails() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const BirthDetailsScreen()),
+    );
+    if (result == true) _load();
   }
 
   @override
@@ -49,12 +66,38 @@ class _KundliScreenState extends State<KundliScreen> {
       appBar: AppBar(title: const Text('Your kundli')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(_error!, style: const TextStyle(color: AppTheme.warning), textAlign: TextAlign.center),
-                ))
-              : _buildContent(),
+          : _needsKundli
+              ? _buildNeedsKundli()
+              : _error != null
+                  ? Center(child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(_error!, style: const TextStyle(color: AppTheme.warning), textAlign: TextAlign.center),
+                    ))
+                  : _buildContent(),
+    );
+  }
+
+  Widget _buildNeedsKundli() {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 60),
+        const Icon(Icons.auto_stories_outlined, size: 56, color: AppTheme.primaryIndigo),
+        const SizedBox(height: 20),
+        Text(
+          "You haven't generated your kundli yet",
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Add your birth details to see your full chart and a step-by-step explanation.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 28),
+        ElevatedButton(onPressed: _openBirthDetails, child: const Text('Generate my kundli')),
+      ],
     );
   }
 

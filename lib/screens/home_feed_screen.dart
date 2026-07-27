@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'chat_screen.dart';
+import 'birth_details_screen.dart';
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -15,6 +16,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   Map<String, dynamic>? _feed;
   bool _loading = true;
   String? _error;
+  bool _needsKundli = false;
 
   @override
   void initState() {
@@ -26,15 +28,30 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _needsKundli = false;
     });
     try {
       final feed = await ApiService.getHomeFeed(UserSession.userId!);
       setState(() => _feed = feed);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) {
+        setState(() => _needsKundli = true);
+      } else {
+        setState(() => _error = e.message);
+      }
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _openBirthDetails() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const BirthDetailsScreen()),
+    );
+    if (result == true) _loadFeed(); // kundli was generated -- refresh the feed
   }
 
   @override
@@ -45,10 +62,39 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         onRefresh: _loadFeed,
         child: _loading
             ? const Center(child: CircularProgressIndicator())
-            : _error != null
-                ? _buildError()
-                : _buildFeed(),
+            : _needsKundli
+                ? _buildNeedsKundli()
+                : _error != null
+                    ? _buildError()
+                    : _buildFeed(),
       ),
+    );
+  }
+
+  Widget _buildNeedsKundli() {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 60),
+        const Icon(Icons.auto_awesome_outlined, size: 56, color: AppTheme.primaryIndigo),
+        const SizedBox(height: 20),
+        Text(
+          'Generate your kundli to unlock your personalized feed',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Your daily energy score, highlights, dasha, and lucky elements are all based on your birth chart.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 28),
+        ElevatedButton(
+          onPressed: _openBirthDetails,
+          child: const Text('Generate my kundli'),
+        ),
+      ],
     );
   }
 
