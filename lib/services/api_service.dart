@@ -1,0 +1,218 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config.dart';
+
+/// Thrown when the backend returns a non-2xx response, carrying the
+/// server's error detail message so the UI can show something meaningful
+/// instead of a generic "something went wrong".
+class ApiException implements Exception {
+  final int statusCode;
+  final String message;
+  ApiException(this.statusCode, this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// Central place for every call to the Astro BhavishyaAI backend.
+/// Mirrors the endpoints built in main.py -- keep this in sync if the
+/// backend API changes.
+class ApiService {
+  static final Uri _base = Uri.parse(AppConfig.apiBaseUrl);
+
+  static Map<String, String> get _jsonHeaders => {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+  static dynamic _handleResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return null;
+      return jsonDecode(response.body);
+    }
+    String message = 'Something went wrong. Please try again.';
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['detail'] != null) {
+        message = decoded['detail'].toString();
+      }
+    } catch (_) {
+      // response wasn't JSON -- fall back to the generic message above
+    }
+    throw ApiException(response.statusCode, message);
+  }
+
+  // ---- Users ----
+
+  static Future<Map<String, dynamic>> createUser({
+    required String phoneNumber,
+    String? name,
+    String languagePref = 'en',
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'phone_number': phoneNumber,
+        'name': name,
+        'language_pref': languagePref,
+      }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getUser(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Birth details / Kundli ----
+
+  static Future<Map<String, dynamic>> submitBirthDetails({
+    required int userId,
+    required String date, // "YYYY-MM-DD"
+    required String time, // "HH:MM"
+    required double tzOffsetHours,
+    required double latitude,
+    required double longitude,
+    String? placeName,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/birth-details'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'date': date,
+        'time': time,
+        'tz_offset_hours': tzOffsetHours,
+        'latitude': latitude,
+        'longitude': longitude,
+        'place_name': placeName,
+      }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getKundli(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/kundli'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getKundliExplanation(
+    int userId, {
+    String? language,
+  }) async {
+    final uri = _base.replace(
+      path: '/users/$userId/kundli-explanation',
+      queryParameters: language != null ? {'language': language} : null,
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getTimingRemediesPredictions(
+    int userId, {
+    String? language,
+  }) async {
+    final uri = _base.replace(
+      path: '/users/$userId/timing-remedies-predictions',
+      queryParameters: language != null ? {'language': language} : null,
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Home feed ----
+
+  static Future<Map<String, dynamic>> getHomeFeed(
+    int userId, {
+    String? language,
+  }) async {
+    final uri = _base.replace(
+      path: '/users/$userId/home-feed',
+      queryParameters: language != null ? {'language': language} : null,
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Rashifal ----
+
+  static Future<Map<String, dynamic>> getRashifal(
+    String rashi,
+    String periodType, {
+    String language = 'en',
+  }) async {
+    final uri = _base.replace(
+      path: '/rashifal/$rashi/$periodType',
+      queryParameters: {'language': language},
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Chat ----
+
+  static Future<Map<String, dynamic>> getQuickQuestions() async {
+    final res = await http.get(_base.replace(path: '/quick-questions'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> chatWithAstrologer({
+    required int userId,
+    required String question,
+    String? category,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/chat'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'question': question, 'category': category}),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> detailedConsultation({
+    required int userId,
+    required String primaryConcern,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/consultation'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'primary_concern': primaryConcern}),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Payments ----
+
+  static Future<Map<String, dynamic>> createOrder({
+    required int userId,
+    required String planType, // "starter" or "lifetime"
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/create-order'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'plan_type': planType}),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> verifyPayment({
+    required int userId,
+    required String orderId,
+    required String paymentId,
+    required String signature,
+    required String planType,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/verify-payment'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'order_id': orderId,
+        'payment_id': paymentId,
+        'signature': signature,
+        'plan_type': planType,
+      }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+}
