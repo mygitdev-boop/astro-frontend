@@ -196,6 +196,15 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getChatHistory(int userId, {int limit = 50}) async {
+    final uri = _base.replace(
+      path: '/users/$userId/chat-history',
+      queryParameters: {'limit': '$limit'},
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   static Future<Map<String, dynamic>> detailedConsultation({
     required int userId,
     required String primaryConcern,

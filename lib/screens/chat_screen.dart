@@ -4,6 +4,7 @@ import '../services/user_session.dart';
 import '../services/ads_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/banner_ad_widget.dart';
+import 'ai_history_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialCategory;
@@ -170,6 +171,16 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ask AI astrologer'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'History',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AiHistoryScreen()),
+            ),
+          ),
+        ],
         bottom: _questionsRemaining != null
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(28),
