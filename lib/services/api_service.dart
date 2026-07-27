@@ -44,6 +44,12 @@ class ApiService {
 
   // ---- Users ----
 
+  static Future<Map<String, dynamic>> checkPhoneExists(String phoneNumber) async {
+    final uri = _base.replace(path: '/users/check-phone', queryParameters: {'phone_number': phoneNumber});
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   static Future<Map<String, dynamic>> createUser({
     required String phoneNumber,
     String? name,
