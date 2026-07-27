@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../config.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
+import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import 'main_nav_screen.dart';
 
@@ -50,6 +51,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         phone: user['phone_number'],
         language: _language,
       );
+
+      // Fire-and-forget -- notification setup shouldn't block getting the
+      // user into the app, and fails silently if Firebase isn't configured
+      // yet (see notification_service.dart for what's needed).
+      NotificationService.requestPermissionAndRegister(user['id']);
+
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavScreen()),

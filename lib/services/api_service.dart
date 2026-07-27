@@ -243,6 +243,18 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> registerFcmToken({
+    required int userId,
+    required String fcmToken,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/register-fcm-token'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'fcm_token': fcmToken}),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Payments ----
 
   static Future<Map<String, dynamic>> createOrder({

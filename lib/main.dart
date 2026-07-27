@@ -3,6 +3,7 @@ import 'config.dart';
 import 'theme/app_theme.dart';
 import 'services/user_session.dart';
 import 'services/ads_service.dart';
+import 'services/notification_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/main_nav_screen.dart';
 
@@ -11,6 +12,7 @@ void main() async {
   await AdsService.initialize();
   AdsService.loadInterstitial();
   AdsService.loadRewarded();
+  await NotificationService.initialize();
   runApp(const AstroBhavishyaApp());
 }
 

@@ -91,6 +91,37 @@ flutter run
 5. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
    Replace with your real ad unit IDs once you have an AdMob account and app registered.
 
+6. **Notifications need a Firebase project** (can't be done from this lib/-only repo):
+
+   **Step 1**: Create a project at https://console.firebase.google.com
+
+   **Step 2**: In that project, click "Add app" -> Android. Package name must match
+   your app's `applicationId` in `android/app/build.gradle`. Download the generated
+   `google-services.json` and place it in `android/app/`.
+
+   **Step 3**: In `android/build.gradle` (the project-level one, not `android/app/build.gradle`),
+   inside `buildscript { dependencies { ... } }`, add:
+   ```
+   classpath 'com.google.gms:google-services:4.4.2'
+   ```
+
+   **Step 4**: At the very bottom of `android/app/build.gradle`, add:
+   ```
+   apply plugin: 'com.google.gms.google-services'
+   ```
+
+   **Step 5 (iOS)**: In the same Firebase project, click "Add app" -> iOS. Download
+   `GoogleService-Info.plist` and add it to `ios/Runner/` via Xcode (drag it into the
+   Runner folder inside Xcode itself, not just the file system, so it's added to the
+   build target correctly).
+
+   **Step 6 (backend)**: In that same Firebase project -> Project Settings -> Service
+   Accounts -> Generate new private key. Set the entire downloaded JSON as the
+   `FIREBASE_SERVICE_ACCOUNT_JSON` environment variable in Railway.
+
+   Until steps 2-5 are done, `NotificationService.initialize()` fails silently and the
+   rest of the app works fine, just without push notifications.
+
 ## API base URL
 Set in `lib/config.dart`:
 ```dart
