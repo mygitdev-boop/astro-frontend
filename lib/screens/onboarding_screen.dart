@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import '../config.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
+import '../services/geocoding_service.dart';
 import '../theme/app_theme.dart';
 import 'main_nav_screen.dart';
 
-/// First-run flow: phone number -> name -> birth details.
+/// First-run flow: name+phone+language (combined) -> birth details.
 /// Ends by creating the user and generating their Kundli, then goes
-/// straight to the home feed.
+/// straight to the home dashboard.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -22,12 +23,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _nameController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
-  final _placeController = TextEditingController();
+  final _cityController = TextEditingController();
 
   String _language = 'en';
-  double _tzOffset = 5.5; // default IST -- covers the vast majority of users
-  double? _latitude;
-  double? _longitude;
+
+  // Default to IST -- this app targets the Indian market. See
+  // geocoding_service.dart for the note on why we don't resolve a
+  // per-city historical UTC offset yet.
+  final double _tzOffset = 5.5;
+
+  CityResult? _selectedCity;
+  List<CityResult> _citySuggestions = [];
+  bool _searchingCity = false;
 
   bool _loading = false;
   String? _error;
@@ -38,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _nameController.dispose();
     _dateController.dispose();
     _timeController.dispose();
-    _placeController.dispose();
+    _cityController.dispose();
     super.dispose();
   }
 
@@ -50,8 +57,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      _dateController.text =
-          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      setState(() {
+        _dateController.text =
+            '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      });
     }
   }
 
@@ -61,17 +70,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       initialTime: const TimeOfDay(hour: 12, minute: 0),
     );
     if (picked != null) {
-      _timeController.text =
-          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      setState(() {
+        _timeController.text =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      });
     }
   }
 
+  Future<void> _onCityChanged(String query) async {
+    _selectedCity = null; // typing invalidates any prior selection
+    if (query.trim().length < 2) {
+      setState(() => _citySuggestions = []);
+      return;
+    }
+    setState(() => _searchingCity = true);
+    final results = await GeocodingService.searchCity(query);
+    if (!mounted) return;
+    setState(() {
+      _citySuggestions = results;
+      _searchingCity = false;
+    });
+  }
+
+  void _selectCity(CityResult city) {
+    setState(() {
+      _selectedCity = city;
+      _cityController.text = city.displayLabel;
+      _citySuggestions = [];
+    });
+  }
+
   Future<void> _submitBirthDetails() async {
-    if (_dateController.text.isEmpty ||
-        _timeController.text.isEmpty ||
-        _latitude == null ||
-        _longitude == null) {
-      setState(() => _error = 'Please fill in date of birth, time, and place.');
+    if (_dateController.text.isEmpty || _timeController.text.isEmpty || _selectedCity == null) {
+      setState(() => _error = 'Please fill in date of birth, time, and select a city from the list.');
       return;
     }
 
@@ -81,7 +112,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
 
     try {
-      // Create the user first
       final user = await ApiService.createUser(
         phoneNumber: _phoneController.text.trim(),
         name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
@@ -94,15 +124,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         language: _language,
       );
 
-      // Then submit birth details -- this triggers Kundli generation server-side
       final result = await ApiService.submitBirthDetails(
         userId: user['id'],
         date: _dateController.text,
         time: _timeController.text,
         tzOffsetHours: _tzOffset,
-        latitude: _latitude!,
-        longitude: _longitude!,
-        placeName: _placeController.text.trim().isEmpty ? null : _placeController.text.trim(),
+        latitude: _selectedCity!.latitude,
+        longitude: _selectedCity!.longitude,
+        placeName: _selectedCity!.displayLabel,
       );
 
       final moonSign = result['chart']?['moon_sign']?['sign'];
@@ -125,9 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _step == 0
-              ? _buildDetailsStep()
-              : _buildBirthDetailsStep(),
+          child: _step == 0 ? _buildDetailsStep() : _buildBirthDetailsStep(),
         ),
       ),
     );
@@ -225,38 +252,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           const SizedBox(height: 16),
           TextField(
-            controller: _placeController,
-            decoration: const InputDecoration(labelText: 'Place of birth (city)'),
+            controller: _cityController,
+            decoration: InputDecoration(
+              labelText: 'Search your birth city',
+              suffixIcon: _searchingCity
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        height: 16, width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : (_selectedCity != null
+                      ? const Icon(Icons.check_circle, color: AppTheme.success, size: 20)
+                      : null),
+            ),
+            onChanged: _onCityChanged,
           ),
-          const SizedBox(height: 16),
-          // NOTE: this is a simplified lat/long entry for now. Before shipping,
-          // replace with a place-autocomplete (e.g. Google Places) that resolves
-          // city name -> lat/long/timezone automatically -- users won't know
-          // their coordinates offhand.
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                  decoration: const InputDecoration(labelText: 'Latitude'),
-                  onChanged: (v) => _latitude = double.tryParse(v),
-                ),
+          if (_citySuggestions.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFEDEBF5)),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                  decoration: const InputDecoration(labelText: 'Longitude'),
-                  onChanged: (v) => _longitude = double.tryParse(v),
-                ),
+              child: Column(
+                children: _citySuggestions.map((city) {
+                  return ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.location_on_outlined, size: 18),
+                    title: Text(city.displayLabel),
+                    onTap: () => _selectCity(city),
+                  );
+                }).toList(),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tip: search "[city name] latitude longitude" to find these.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+            ),
           if (_error != null) ...[
             const SizedBox(height: 16),
             Text(_error!, style: const TextStyle(color: AppTheme.warning)),

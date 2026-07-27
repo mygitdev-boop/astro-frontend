@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'home_feed_screen.dart';
-import 'kundli_screen.dart';
 import 'rashifal_screen.dart';
+import 'kundli_screen.dart';
 import 'chat_screen.dart';
+import 'profile_screen.dart';
 
-/// Bottom-tab shell tying together the 4 core screens once onboarding
-/// is complete.
+/// Bottom-tab shell -- order matches the spec doc:
+/// Home, Rashifal, Kundli, AI Astrologer, Profile.
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
 
@@ -18,9 +19,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
   final _screens = const [
     HomeFeedScreen(),
-    KundliScreen(),
     RashifalScreen(),
+    KundliScreen(),
     ChatScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -32,9 +34,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Rashifal'),
           NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories), label: 'Kundli'),
-          NavigationDestination(icon: Icon(Icons.calendar_month_outlined), selectedIcon: Icon(Icons.calendar_month), label: 'Rashifal'),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'Ask AI'),
+          NavigationDestination(icon: Icon(Icons.smart_toy_outlined), selectedIcon: Icon(Icons.smart_toy), label: 'AI Astrologer'),
+          NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
