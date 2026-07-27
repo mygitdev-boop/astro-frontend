@@ -207,6 +207,11 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> rewardBonusQuestion(int userId) async {
+    final res = await http.post(_base.replace(path: '/users/$userId/reward-bonus-question'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Payments ----
 
   static Future<Map<String, dynamic>> createOrder({

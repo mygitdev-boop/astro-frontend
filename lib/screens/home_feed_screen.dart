@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'chat_screen.dart';
 import 'birth_details_screen.dart';
 import 'reports_screen.dart';
@@ -44,6 +45,15 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       _needsKundli = false;
     });
     try {
+      // Sync plan status too -- cheap call, keeps ad-free/premium state current
+      // (e.g. right after subscribing, or if a plan expired since last check).
+      try {
+        final user = await ApiService.getUser(UserSession.userId!);
+        UserSession.planType = user['plan_type'] ?? 'free';
+      } catch (_) {
+        // Non-critical -- feed still loads even if this sync fails
+      }
+
       final feed = await ApiService.getHomeFeed(UserSession.userId!);
       setState(() => _feed = feed);
     } on ApiException catch (e) {
@@ -81,6 +91,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                     ? _buildError()
                     : _buildFeed(),
       ),
+      bottomNavigationBar: UserSession.isPremium ? null : const BannerAdWidget(),
     );
   }
 

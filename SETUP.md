@@ -57,16 +57,39 @@ flutter run
 1. **No persistent login** -- `UserSession` (in `lib/services/user_session.dart`) is
    in-memory only. Add the `shared_preferences` package and persist `userId` so users
    don't have to re-enter everything on every app restart.
-2. **Latitude/longitude entry is manual** -- the birth details form asks users to type
-   coordinates directly, which nobody will know offhand. Before shipping, replace this
-   with a place autocomplete (Google Places API) that resolves a typed city name to
-   lat/long/timezone automatically.
-3. **No OTP verification** -- phone number is currently just a text field with no
+2. **No OTP verification** -- phone number is currently just a text field with no
    verification step. The original plan calls for Firebase Auth with OTP; that's not
    wired in yet.
-4. **No payment UI** -- the backend's Razorpay endpoints exist, but there's no
-   Starter/Lifetime upgrade screen in the app yet.
-5. **No AdMob integration** -- banner/interstitial ad placements aren't in the UI yet.
+3. **Payment checkout SDK not wired** -- the Subscription screen creates a Razorpay
+   Order via the backend, but doesn't open the actual payment UI yet. For a real
+   Android/iOS build, add the `razorpay_flutter` package and wire it in
+   `subscription_screen.dart` (see the comment at the top of that file).
+4. **AdMob needs manual platform config** (can't be done from this lib/-only repo --
+   edit these files directly in your local Flutter project):
+
+   **Android** -- add to `android/app/src/main/AndroidManifest.xml`, inside `<application>`:
+   ```xml
+   <meta-data
+       android:name="com.google.android.gms.ads.APPLICATION_ID"
+       android:value="ca-app-pub-3940256099942544~3347511713"/>
+   ```
+   (That's Google's TEST App ID -- safe for development. Replace with your real
+   AdMob App ID before release, from https://apps.admob.com.)
+
+   **iOS** -- add to `ios/Runner/Info.plist`:
+   ```xml
+   <key>GADApplicationIdentifier</key>
+   <string>ca-app-pub-3940256099942544~1458002511</string>
+   ```
+   (Also Google's TEST App ID for iOS.)
+
+   **Important**: ads only render on Android/iOS, never on Flutter Web -- if you're
+   testing with `flutter run -d chrome`, you will see zero ads, which is expected.
+   You need an Android emulator (via Android Studio) or a physical device to see
+   these actually render.
+
+5. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
+   Replace with your real ad unit IDs once you have an AdMob account and app registered.
 
 ## API base URL
 Set in `lib/config.dart`:

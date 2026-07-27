@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
+import '../services/ads_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialCategory;
@@ -26,6 +28,9 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _selectedCategory;
   bool _sending = false;
   int? _questionsRemaining;
+  int _exchangeCount = 0; // used to show an interstitial every few exchanges
+
+  static const int _interstitialEveryNExchanges = 3;
 
   @override
   void initState() {
@@ -61,13 +66,80 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _messages.add(_ChatMessage('assistant', result['answer']));
         _questionsRemaining = result['questions_remaining_today'];
+        _exchangeCount++;
       });
+
+      // Show an interstitial every few exchanges, free-tier only, and only
+      // after the response is already showing (never interrupt mid-answer).
+      if (!UserSession.isPremium && _exchangeCount % _interstitialEveryNExchanges == 0) {
+        AdsService.showInterstitialIfReady();
+      }
+    } on ApiException catch (e) {
+      if (e.statusCode == 429) {
+        setState(() => _messages.removeLast()); // remove the user's message we optimistically added -- retry after ad
+        _offerRewardedAdRetry(question);
+      } else {
+        setState(() => _messages.add(_ChatMessage('assistant', 'Sorry -- ${e.message}')));
+      }
     } catch (e) {
       setState(() => _messages.add(_ChatMessage('assistant', 'Sorry -- $e')));
     } finally {
       if (mounted) setState(() => _sending = false);
       _scrollToBottom();
     }
+  }
+
+  void _offerRewardedAdRetry(String pendingQuestion) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Daily free limit reached'),
+        content: const Text(
+          'Watch a short ad to unlock one more question today, or upgrade to Monthly/Yearly for unlimited chat.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _watchAdAndRetry(pendingQuestion);
+            },
+            child: const Text('Watch ad'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _watchAdAndRetry(String pendingQuestion) {
+    if (!AdsService.isRewardedReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ad not ready yet -- please try again in a moment.')),
+      );
+      return;
+    }
+    AdsService.showRewarded(
+      onRewardEarned: () async {
+        try {
+          await ApiService.rewardBonusQuestion(UserSession.userId!);
+          if (mounted) _send(pendingQuestion); // retry the original question now that a bonus is granted
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Could not grant bonus question: $e')),
+            );
+          }
+        }
+      },
+      onNotReady: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ad not ready yet -- please try again in a moment.')),
+        );
+      },
+    );
   }
 
   void _scrollToBottom() {
@@ -124,6 +196,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
           ),
           if (_sending) const LinearProgressIndicator(minHeight: 2),
+          if (!UserSession.isPremium) const BannerAdWidget(),
           _buildInputBar(),
         ],
       ),

@@ -10,9 +10,11 @@ class UserSession {
   static String? phoneNumber;
   static String languagePref = 'en';
   static String? moonSignRashi; // set after birth details are submitted
+  static String planType = 'free'; // "free" / "monthly" / "yearly"
 
   static bool get isLoggedIn => userId != null;
   static bool get hasKundli => moonSignRashi != null;
+  static bool get isPremium => planType != 'free';
 
   static void setUser({
     required int id,
@@ -32,5 +34,6 @@ class UserSession {
     phoneNumber = null;
     languagePref = 'en';
     moonSignRashi = null;
+    planType = 'free';
   }
 }

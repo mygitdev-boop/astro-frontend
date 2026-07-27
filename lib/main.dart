@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'config.dart';
 import 'theme/app_theme.dart';
 import 'services/user_session.dart';
+import 'services/ads_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/main_nav_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AdsService.initialize();
+  AdsService.loadInterstitial();
+  AdsService.loadRewarded();
   runApp(const AstroBhavishyaApp());
 }
 
