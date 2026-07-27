@@ -264,6 +264,11 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getTodaysDevotional() async {
+    final res = await http.get(_base.replace(path: '/devotional/today'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Compatibility ----
 
   static Future<Map<String, dynamic>> checkCompatibility({

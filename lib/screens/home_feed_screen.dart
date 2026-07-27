@@ -23,6 +23,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 
   List<dynamic> _festivals = [];
   Map<String, dynamic>? _panchang;
+  Map<String, dynamic>? _devotional;
 
   @override
   void initState() {
@@ -30,7 +31,17 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     _loadFeed();
     _loadFestivals(); // independent of kundli -- always available
     _loadPanchang();  // also independent -- pure astronomy, no kundli needed
+    _loadDevotional(); // also independent -- today's weekday deity/mantra
     UserSession.kundliUpdateSignal.addListener(_onKundliUpdated);
+  }
+
+  Future<void> _loadDevotional() async {
+    try {
+      final result = await ApiService.getTodaysDevotional();
+      if (mounted) setState(() => _devotional = result);
+    } catch (_) {
+      // Non-critical -- skip silently if this fails
+    }
   }
 
   @override
@@ -149,16 +160,76 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
             const SizedBox(height: 12),
             Wrap(
               spacing: 16,
-              runSpacing: 8,
+              runSpacing: 10,
               children: [
-                if (tithi != null) _PanchangItem(label: 'Tithi', value: '${tithi['name']} (${tithi['paksha']})'),
-                if (p['nakshatra'] != null) _PanchangItem(label: 'Nakshatra', value: p['nakshatra']),
-                if (p['yoga'] != null) _PanchangItem(label: 'Yoga', value: p['yoga']),
-                if (p['karana'] != null) _PanchangItem(label: 'Karana', value: p['karana']),
-                if (p['sunrise'] != null) _PanchangItem(label: 'Sunrise', value: p['sunrise']),
-                if (p['sunset'] != null) _PanchangItem(label: 'Sunset', value: p['sunset']),
+                if (tithi != null) _PanchangItem(icon: Icons.brightness_2_outlined, label: 'Tithi', value: '${tithi['name']} (${tithi['paksha']})'),
+                if (p['nakshatra'] != null) _PanchangItem(icon: Icons.star_border_rounded, label: 'Nakshatra', value: p['nakshatra']),
+                if (p['yoga'] != null) _PanchangItem(icon: Icons.all_inclusive, label: 'Yoga', value: p['yoga']),
+                if (p['karana'] != null) _PanchangItem(icon: Icons.change_circle_outlined, label: 'Karana', value: p['karana']),
+                if (p['sunrise'] != null) _PanchangItem(icon: Icons.wb_twilight, label: 'Sunrise', value: p['sunrise']),
+                if (p['sunset'] != null) _PanchangItem(icon: Icons.nights_stay_outlined, label: 'Sunset', value: p['sunset']),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDevotionalCard() {
+    final d = _devotional!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.self_improvement, size: 18, color: AppTheme.accentOrange),
+                const SizedBox(width: 8),
+                Text("Today's devotion -- ${d['deity']}", style: Theme.of(context).textTheme.titleMedium),
+              ],
+            ),
+            const SizedBox(height: 4),
+            if (d['note'] != null)
+              Text(d['note'], style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.accentOrangeLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    d['mantra_sanskrit'] ?? '',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.primaryBrown),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    d['mantra_transliteration'] ?? '',
+                    style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 13, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (d['mantra_meaning'] != null)
+              Text(d['mantra_meaning'], style: Theme.of(context).textTheme.bodyMedium),
+            if (d['chalisa_name'] != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.menu_book_outlined, size: 14, color: AppTheme.textSecondary),
+                  const SizedBox(width: 6),
+                  Text('Also consider reading: ${d['chalisa_name']}', style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -191,6 +262,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         if (_panchang != null) ...[
           const SizedBox(height: 32),
           _buildPanchangCard(),
+        ],
+        if (_devotional != null) ...[
+          const SizedBox(height: 16),
+          _buildDevotionalCard(),
         ],
         if (_festivals.isNotEmpty) ...[
           const SizedBox(height: 32),
@@ -280,6 +355,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         if (_panchang != null) ...[
           const SizedBox(height: 16),
           _buildPanchangCard(),
+        ],
+        if (_devotional != null) ...[
+          const SizedBox(height: 16),
+          _buildDevotionalCard(),
         ],
         if (_festivals.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -520,19 +599,29 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 }
 
 class _PanchangItem extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  const _PanchangItem({required this.label, required this.value});
+  const _PanchangItem({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 140,
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+          Icon(icon, size: 16, color: AppTheme.accentOrange),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: Theme.of(context).textTheme.bodySmall),
+                Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+              ],
+            ),
+          ),
         ],
       ),
     );
