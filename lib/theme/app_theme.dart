@@ -97,4 +97,85 @@ class AppTheme {
       ),
     );
   }
+
+  // --- Dark theme: keeps the same warm orange accent, swaps backgrounds/text
+  // for a dark palette. Same structure as lightTheme so widgets that use
+  // Theme.of(context) automatically adapt without per-screen changes.
+  static const Color backgroundDark = Color(0xFF1A1410);
+  static const Color cardDark = Color(0xFF251E18);
+  static const Color textPrimaryDark = Color(0xFFF5EDE1);
+  static const Color textSecondaryDark = Color(0xFFB5A793);
+  static const Color borderDark = Color(0xFF3A2F24);
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      scaffoldBackgroundColor: backgroundDark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: accentOrange,
+        primary: accentOrange,
+        secondary: accentYellow,
+        surface: cardDark,
+        brightness: Brightness.dark,
+      ),
+      fontFamily: 'Roboto',
+      textTheme: TextTheme(
+        headlineMedium: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: textPrimaryDark),
+        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimaryDark),
+        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textPrimaryDark),
+        bodyLarge: TextStyle(fontSize: 15, color: textPrimaryDark, height: 1.5),
+        bodyMedium: TextStyle(fontSize: 14, color: textSecondaryDark, height: 1.5),
+        bodySmall: TextStyle(fontSize: 12, color: textSecondaryDark),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: backgroundDark,
+        foregroundColor: textPrimaryDark,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: textPrimaryDark),
+      ),
+      cardTheme: CardThemeData(
+        color: cardDark,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: borderDark, width: 1),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: accentOrange,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          elevation: 0,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: cardDark,
+        indicatorColor: accentOrange.withValues(alpha: 0.25),
+        labelTextStyle: WidgetStateProperty.all(
+          TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: textPrimaryDark),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: cardDark,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: borderDark),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: borderDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: accentOrange, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
 }
