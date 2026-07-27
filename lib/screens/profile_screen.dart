@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'onboarding_screen.dart';
 import 'birth_details_screen.dart';
+import 'subscription_screen.dart';
 
 /// Basic profile screen. Covers the core items from the screen spec
 /// (name, birth details summary, language, logout); subscription status,
@@ -138,10 +139,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                 ),
                 const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.workspace_premium_outlined),
-                  title: Text('Subscription'),
-                  trailing: Text('Free'),
+                ListTile(
+                  leading: const Icon(Icons.workspace_premium_outlined),
+                  title: const Text('Subscription'),
+                  trailing: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Free'),
+                      Icon(Icons.chevron_right, size: 18),
+                    ],
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+                  ),
                 ),
               ],
             ),
