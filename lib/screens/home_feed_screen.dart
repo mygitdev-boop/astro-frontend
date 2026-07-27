@@ -4,6 +4,7 @@ import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'chat_screen.dart';
 import 'birth_details_screen.dart';
+import 'reports_screen.dart';
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -389,14 +390,21 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           children: [
             Text('Recommended for you', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
-            ...recommended.map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle_outline, size: 18, color: AppTheme.success),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(item['label'] ?? '', style: Theme.of(context).textTheme.bodyMedium)),
-                    ],
+            ...recommended.map((item) => InkWell(
+                  onTap: item['type'] == 'report' || item['type'] == 'upsell'
+                      ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()))
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline, size: 18, color: AppTheme.success),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(item['label'] ?? '', style: Theme.of(context).textTheme.bodyMedium)),
+                        if (item['type'] == 'report' || item['type'] == 'upsell')
+                          const Icon(Icons.chevron_right, size: 16, color: AppTheme.textSecondary),
+                      ],
+                    ),
                   ),
                 )),
           ],

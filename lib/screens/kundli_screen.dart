@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'birth_details_screen.dart';
+import 'reports_screen.dart';
 
 class KundliScreen extends StatefulWidget {
   const KundliScreen({super.key});
@@ -126,6 +127,15 @@ class _KundliScreenState extends State<KundliScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ReportsScreen()),
+          ),
+          icon: const Icon(Icons.description_outlined, size: 18),
+          label: const Text('View detailed reports'),
         ),
       ],
     );
