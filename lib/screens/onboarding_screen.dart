@@ -16,7 +16,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  int _step = 0; // 0 = welcome, 1 = phone+name, 2 = birth details
+  int _step = 0; // 0 = name+phone+language (combined), 1 = birth details
 
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
@@ -126,87 +126,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: _step == 0
-              ? _buildWelcomeStep()
-              : _step == 1
-                  ? _buildPhoneStep()
-                  : _buildBirthDetailsStep(),
+              ? _buildDetailsStep()
+              : _buildBirthDetailsStep(),
         ),
       ),
     );
   }
 
-  Widget _buildWelcomeStep() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.nights_stay_rounded, size: 72, color: AppTheme.primaryIndigo),
-        const SizedBox(height: 24),
-        Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 8),
-        Text(
-          AppConfig.appTagline,
-          style: Theme.of(context).textTheme.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 40),
-        const Text('Choose your language', style: TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _LanguageChip(
-              label: 'English',
-              selected: _language == 'en',
-              onTap: () => setState(() => _language = 'en'),
-            ),
-            const SizedBox(width: 12),
-            _LanguageChip(
-              label: 'हिन्दी',
-              selected: _language == 'hi',
-              onTap: () => setState(() => _language = 'hi'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 40),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => setState(() => _step = 1),
-            child: const Text('Get started'),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildDetailsStep() {
+    final canContinue = _phoneController.text.trim().isNotEmpty;
 
-  Widget _buildPhoneStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('What should we call you?', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 24),
-        TextField(
-          controller: _nameController,
-          decoration: const InputDecoration(labelText: 'Your name'),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _phoneController,
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(labelText: 'Phone number'),
-        ),
-        const SizedBox(height: 32),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _phoneController.text.trim().isEmpty
-                ? null
-                : () => setState(() => _step = 2),
-            child: const Text('Continue'),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 40),
+          const Icon(Icons.nights_stay_rounded, size: 56, color: AppTheme.primaryIndigo),
+          const SizedBox(height: 16),
+          Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 6),
+          Text(AppConfig.appTagline, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 32),
+          const Text('Choose your language', style: TextStyle(fontWeight: FontWeight.w500)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _LanguageChip(
+                label: 'English',
+                selected: _language == 'en',
+                onTap: () => setState(() => _language = 'en'),
+              ),
+              const SizedBox(width: 12),
+              _LanguageChip(
+                label: 'हिन्दी',
+                selected: _language == 'hi',
+                onTap: () => setState(() => _language = 'hi'),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 28),
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Your name'),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(labelText: 'Phone number'),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: canContinue ? () => setState(() => _step = 1) : null,
+              child: const Text('Continue'),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
