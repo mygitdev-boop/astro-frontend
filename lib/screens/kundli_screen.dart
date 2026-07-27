@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../config.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
@@ -38,6 +40,16 @@ class _KundliScreenState extends State<KundliScreen> {
 
   void _onKundliUpdated() {
     if (mounted) _load();
+  }
+
+  Future<void> _downloadPdf() async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/users/${UserSession.userId}/kundli-pdf');
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the PDF. Please try again.')),
+      );
+    }
   }
 
   Future<void> _load() async {
@@ -141,6 +153,12 @@ class _KundliScreenState extends State<KundliScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: _downloadPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+          label: const Text('Download as PDF'),
+        ),
+        const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: () => Navigator.push(
             context,
