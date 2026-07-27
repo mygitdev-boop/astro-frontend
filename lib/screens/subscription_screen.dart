@@ -1,22 +1,18 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 
-/// "Go Premium" paywall screen. Shows Free vs Monthly (₹99) vs Yearly (₹999).
+/// "Go Premium" paywall screen. Shows Free vs Monthly (₹99) vs Yearly (₹999),
+/// and opens Razorpay's actual checkout UI to collect payment.
 ///
-/// IMPORTANT SCOPE NOTE: this screen creates a Razorpay Order via the
-/// backend (/create-order) but does NOT yet open Razorpay's actual payment
-/// checkout UI -- that requires a platform-specific SDK:
-///   - For a real Android/iOS build: the `razorpay_flutter` package, which
-///     opens Razorpay's native checkout and returns payment_id/signature
-///     directly to this app.
-///   - For Flutter Web: Razorpay's web checkout.js needs JS interop (or a
-///     redirect to a hosted checkout page), since it can't run inside
-///     Flutter's canvas-based renderer the same way.
-/// This screen is wired up to the point of creating the order; wiring the
-/// actual checkout SDK is the next concrete step once you're building for
-/// a real device/platform.
+/// PLATFORM NOTE: razorpay_flutter only works on Android/iOS, not Flutter
+/// Web (same limitation as google_mobile_ads). If you're testing with
+/// `flutter run -d chrome`, tapping Subscribe will show an error instead
+/// of opening checkout -- that's expected. Test on an Android
+/// emulator/device to see the real payment flow.
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
 
@@ -29,6 +25,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   bool _loading = false;
   String? _error;
 
+  Razorpay? _razorpay;
+  String? _pendingOrderId; // set right before opening checkout, used on success
+
   static const _benefits = [
     'Unlimited AI astrologer chat',
     'Detailed kundli & consultation reports',
@@ -37,7 +36,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     'Priority support',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) {
+      _razorpay = Razorpay();
+      _razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onPaymentSuccess);
+      _razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, _onPaymentError);
+      _razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, _onExternalWallet);
+    }
+  }
+
+  @override
+  void dispose() {
+    _razorpay?.clear();
+    super.dispose();
+  }
+
   Future<void> _subscribe() async {
+    if (kIsWeb) {
+      setState(() => _error = 'Payment checkout only works on Android/iOS, not in this web preview.');
+      return;
+    }
+
     setState(() {
       _loading = true;
       _error = null;
@@ -47,28 +68,82 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         userId: UserSession.userId!,
         planType: _selectedPlan,
       );
+      _pendingOrderId = order['order_id'];
+
+      final options = {
+        'key': order['razorpay_key_id'],
+        'amount': order['amount'], // already in paise from the backend
+        'order_id': order['order_id'],
+        'currency': order['currency'],
+        'name': 'Astro BhavishyaAI',
+        'description': _selectedPlan == 'monthly' ? 'Monthly subscription' : 'Yearly subscription',
+        'prefill': {
+          'contact': UserSession.phoneNumber ?? '',
+        },
+      };
+
+      _razorpay!.open(options);
+      // Note: _loading stays true until one of the Razorpay callbacks fires --
+      // the checkout UI takes over the screen at this point.
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      await ApiService.verifyPayment(
+        userId: UserSession.userId!,
+        orderId: _pendingOrderId!,
+        paymentId: response.paymentId!,
+        signature: response.signature!,
+        planType: _selectedPlan,
+      );
+      UserSession.planType = _selectedPlan;
       if (!mounted) return;
-      // Order created successfully on the backend -- see the scope note
-      // above for why checkout doesn't open yet on this platform.
+      setState(() => _loading = false);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Order created'),
-          content: Text(
-            'Order ID: ${order['order_id']}\nAmount: ₹${(order['amount'] as int) / 100}\n\n'
-            'Payment checkout isn\'t wired up on this platform yet -- see the '
-            'note in subscription_screen.dart for what\'s needed next.',
-          ),
+          title: const Text('Payment successful'),
+          content: Text('Your ${_selectedPlan == 'monthly' ? 'Monthly' : 'Yearly'} plan is now active.'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // close dialog
+                Navigator.pop(context); // close subscription screen
+              },
+              child: const Text('Done'),
+            ),
           ],
         ),
       );
     } catch (e) {
-      setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _loading = false);
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = 'Payment succeeded but activation failed: $e. Contact support with your payment ID: ${response.paymentId}';
+      });
     }
+  }
+
+  void _onPaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _error = 'Payment failed: ${response.message ?? 'Unknown error'}';
+    });
+  }
+
+  void _onExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _error = 'Redirected to ${response.walletName} -- complete payment there.';
+    });
   }
 
   @override

@@ -259,7 +259,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> createOrder({
     required int userId,
-    required String planType, // "starter" or "lifetime"
+    required String planType, // "monthly" or "yearly"
   }) async {
     final res = await http.post(
       _base.replace(path: '/users/$userId/create-order'),
