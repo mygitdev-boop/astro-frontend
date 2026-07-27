@@ -135,6 +135,11 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getDivisionalCharts(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/divisional-charts'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   static Future<Map<String, dynamic>> getYogasDoshas(
     int userId, {
     String? language,
