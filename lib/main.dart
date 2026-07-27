@@ -9,6 +9,7 @@ import 'screens/main_nav_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UserSession.load(); // restore a previous session, if one exists
   await AdsService.initialize();
   AdsService.loadInterstitial();
   AdsService.loadRewarded();
@@ -25,10 +26,9 @@ class AstroBhavishyaApp extends StatelessWidget {
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      // NOTE: UserSession is in-memory only right now (see user_session.dart),
-      // so this always starts at onboarding on a fresh app launch. Once
-      // persistent storage is added, check UserSession.isLoggedIn here and
-      // route straight to MainNavScreen for returning users.
+      // UserSession.load() above (called before runApp) restores a previous
+      // session from disk, so returning users go straight to the main app
+      // instead of seeing onboarding again.
       home: UserSession.isLoggedIn ? const MainNavScreen() : const OnboardingScreen(),
     );
   }

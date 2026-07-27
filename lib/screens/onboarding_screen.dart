@@ -45,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         gender: _gender,
         languagePref: _language,
       );
-      UserSession.setUser(
+      await UserSession.setUser(
         id: user['id'],
         userName: user['name'],
         phone: user['phone_number'],

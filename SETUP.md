@@ -54,17 +54,14 @@ flutter run
   free questions/day
 
 ## Known gaps to fix before this is launch-ready
-1. **No persistent login** -- `UserSession` (in `lib/services/user_session.dart`) is
-   in-memory only. Add the `shared_preferences` package and persist `userId` so users
-   don't have to re-enter everything on every app restart.
-2. **No OTP verification** -- phone number is currently just a text field with no
+1. **No OTP verification** -- phone number is currently just a text field with no
    verification step. The original plan calls for Firebase Auth with OTP; that's not
    wired in yet.
-3. **Payment checkout SDK not wired** -- the Subscription screen creates a Razorpay
+2. **Payment checkout SDK not wired** -- the Subscription screen creates a Razorpay
    Order via the backend, but doesn't open the actual payment UI yet. For a real
    Android/iOS build, add the `razorpay_flutter` package and wire it in
    `subscription_screen.dart` (see the comment at the top of that file).
-4. **AdMob needs manual platform config** (can't be done from this lib/-only repo --
+3. **AdMob needs manual platform config** (can't be done from this lib/-only repo --
    edit these files directly in your local Flutter project):
 
    **Android** -- add to `android/app/src/main/AndroidManifest.xml`, inside `<application>`:
@@ -88,10 +85,10 @@ flutter run
    You need an Android emulator (via Android Studio) or a physical device to see
    these actually render.
 
-5. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
+4. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
    Replace with your real ad unit IDs once you have an AdMob account and app registered.
 
-6. **Notifications need a Firebase project** (can't be done from this lib/-only repo):
+5. **Notifications need a Firebase project** (can't be done from this lib/-only repo):
 
    **Step 1**: Create a project at https://console.firebase.google.com
 

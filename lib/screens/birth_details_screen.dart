@@ -102,7 +102,8 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen> {
         longitude: _selectedCity!.longitude,
         placeName: _selectedCity!.displayLabel,
       );
-      UserSession.moonSignRashi = result['chart']?['moon_sign']?['sign'];
+      final moonSign = result['chart']?['moon_sign']?['sign'];
+      if (moonSign != null) await UserSession.setMoonSign(moonSign);
       if (!mounted) return;
       Navigator.of(context).pop(true); // signal success to caller
     } catch (e) {

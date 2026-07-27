@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _updatingLanguage = true);
     try {
       await ApiService.updateLanguage(userId: UserSession.userId!, languagePref: chosen);
-      UserSession.languagePref = chosen;
+      await UserSession.setLanguage(chosen);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -162,8 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListTile(
               leading: const Icon(Icons.logout, color: AppTheme.warning),
               title: const Text('Log out', style: TextStyle(color: AppTheme.warning)),
-              onTap: () {
-                UserSession.clear();
+              onTap: () async {
+                await UserSession.clear();
+                if (!context.mounted) return;
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const OnboardingScreen()),
                   (route) => false,
