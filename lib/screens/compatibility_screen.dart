@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../services/geocoding_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ai_markdown_text.dart';
 
 class CompatibilityScreen extends StatefulWidget {
   const CompatibilityScreen({super.key});
@@ -177,7 +178,7 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
                 children: [
                   Text('Our advice', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 10),
-                  Text(_result!['explanation'], style: Theme.of(context).textTheme.bodyLarge),
+                  AiMarkdownText(data: _result!['explanation']),
                 ],
               ),
             ),

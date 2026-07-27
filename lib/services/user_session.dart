@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Holds the current user's identity for the duration of the app session,
@@ -13,6 +14,13 @@ class UserSession {
   static String languagePref = 'en';
   static String? moonSignRashi; // set after birth details are submitted
   static String planType = 'free'; // "free" / "monthly" / "yearly"
+
+  // Fires whenever the kundli is generated/updated. Screens that depend on
+  // moonSignRashi (Rashifal, Home, Kundli) listen to this and refresh --
+  // needed because the app uses an IndexedStack for its bottom tabs, which
+  // keeps every tab alive in memory. Without this, generating your kundli
+  // on one tab wouldn't be noticed by another tab already sitting in memory.
+  static final ValueNotifier<int> kundliUpdateSignal = ValueNotifier(0);
 
   static bool get isLoggedIn => userId != null;
   static bool get hasKundli => moonSignRashi != null;
@@ -55,11 +63,13 @@ class UserSession {
   }
 
   /// Called once a kundli is generated -- persists the moon sign so
-  /// Rashifal/Kundli screens know it's available even after an app restart.
+  /// Rashifal/Kundli screens know it's available even after an app restart,
+  /// and notifies any listening screens (see kundliUpdateSignal above).
   static Future<void> setMoonSign(String rashi) async {
     moonSignRashi = rashi;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyMoonSign, rashi);
+    kundliUpdateSignal.value++;
   }
 
   static Future<void> setLanguage(String language) async {

@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'subscription_screen.dart';
+import '../widgets/ai_markdown_text.dart';
 
 /// Reports grid -- Career/Marriage/Finance/Health/Education/Business.
 /// Each card generates a detailed report via the existing /consultation
@@ -145,7 +146,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                         Card(
                           child: Padding(
                             padding: const EdgeInsets.all(20),
-                            child: Text(_report ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                            child: AiMarkdownText(data: _report ?? ''),
                           ),
                         ),
                       ],

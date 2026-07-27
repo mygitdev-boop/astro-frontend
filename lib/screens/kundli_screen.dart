@@ -7,6 +7,7 @@ import 'reports_screen.dart';
 import 'compatibility_screen.dart';
 import 'yogas_doshas_screen.dart';
 import 'divisional_charts_screen.dart';
+import '../widgets/ai_markdown_text.dart';
 
 class KundliScreen extends StatefulWidget {
   const KundliScreen({super.key});
@@ -26,6 +27,17 @@ class _KundliScreenState extends State<KundliScreen> {
   void initState() {
     super.initState();
     _load();
+    UserSession.kundliUpdateSignal.addListener(_onKundliUpdated);
+  }
+
+  @override
+  void dispose() {
+    UserSession.kundliUpdateSignal.removeListener(_onKundliUpdated);
+    super.dispose();
+  }
+
+  void _onKundliUpdated() {
+    if (mounted) _load();
   }
 
   Future<void> _load() async {
@@ -125,10 +137,7 @@ class _KundliScreenState extends State<KundliScreen> {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Text(
-              _explanation ?? 'No explanation available yet.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            child: AiMarkdownText(data: _explanation ?? 'No explanation available yet.'),
           ),
         ),
         const SizedBox(height: 16),

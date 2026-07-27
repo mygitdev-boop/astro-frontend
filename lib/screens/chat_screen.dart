@@ -4,6 +4,7 @@ import '../services/user_session.dart';
 import '../services/ads_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../widgets/ai_markdown_text.dart';
 import 'ai_history_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -252,21 +253,40 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessageBubble(_ChatMessage message) {
     final isUser = message.role == 'user';
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
-        decoration: BoxDecoration(
-          color: isUser ? AppTheme.primaryBrown : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isUser ? null : Border.all(color: const Color(0xFFEDEBF5)),
-        ),
-        child: Text(
-          message.content,
-          style: TextStyle(color: isUser ? Colors.white : AppTheme.textPrimary, height: 1.4),
-        ),
+    final bubble = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+      decoration: BoxDecoration(
+        color: isUser ? AppTheme.primaryBrown : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: isUser ? null : Border.all(color: const Color(0xFFEDEBF5)),
+      ),
+      child: isUser
+          ? Text(message.content, style: const TextStyle(color: Colors.white, height: 1.4))
+          : AiMarkdownText(data: message.content),
+    );
+
+    if (isUser) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Align(alignment: Alignment.centerRight, child: bubble),
+      );
+    }
+
+    // Assistant messages get a small astrologer icon avatar alongside the bubble.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CircleAvatar(
+            radius: 14,
+            backgroundColor: AppTheme.accentOrangeLight,
+            child: Icon(Icons.auto_awesome, size: 14, color: AppTheme.accentOrange),
+          ),
+          const SizedBox(width: 8),
+          Flexible(child: bubble),
+        ],
       ),
     );
   }

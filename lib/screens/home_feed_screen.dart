@@ -30,6 +30,17 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     _loadFeed();
     _loadFestivals(); // independent of kundli -- always available
     _loadPanchang();  // also independent -- pure astronomy, no kundli needed
+    UserSession.kundliUpdateSignal.addListener(_onKundliUpdated);
+  }
+
+  @override
+  void dispose() {
+    UserSession.kundliUpdateSignal.removeListener(_onKundliUpdated);
+    super.dispose();
+  }
+
+  void _onKundliUpdated() {
+    if (mounted) _loadFeed();
   }
 
   Future<void> _loadPanchang() async {

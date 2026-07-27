@@ -25,6 +25,17 @@ class _RashifalScreenState extends State<RashifalScreen> {
   void initState() {
     super.initState();
     _load();
+    UserSession.kundliUpdateSignal.addListener(_onKundliUpdated);
+  }
+
+  @override
+  void dispose() {
+    UserSession.kundliUpdateSignal.removeListener(_onKundliUpdated);
+    super.dispose();
+  }
+
+  void _onKundliUpdated() {
+    if (mounted) _load(); // kundli was generated/updated elsewhere -- refresh
   }
 
   Future<void> _load() async {

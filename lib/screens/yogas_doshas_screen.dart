@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ai_markdown_text.dart';
 
 class YogasDoshasScreen extends StatefulWidget {
   const YogasDoshasScreen({super.key});
@@ -69,7 +70,7 @@ class _YogasDoshasScreenState extends State<YogasDoshasScreen> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Text(_explanation!, style: Theme.of(context).textTheme.bodyLarge),
+              child: AiMarkdownText(data: _explanation!),
             ),
           ),
           const SizedBox(height: 20),
