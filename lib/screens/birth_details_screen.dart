@@ -165,9 +165,11 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen> {
                 Container(
                   margin: const EdgeInsets.only(top: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardTheme.color ?? Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFEDEBF5)),
+                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.borderDark
+                        : const Color(0xFFEDEBF5)),
                   ),
                   child: Column(
                     children: _citySuggestions.map((city) {

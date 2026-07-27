@@ -306,19 +306,27 @@ class _ChoiceChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryBrown : Colors.white,
+          color: selected
+              ? AppTheme.primaryBrown
+              : (Theme.of(context).cardTheme.color ?? Colors.white),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? AppTheme.primaryBrown : const Color(0xFFF0E4D3)),
+          border: Border.all(
+              color: selected
+                  ? AppTheme.primaryBrown
+                  : (isDark ? AppTheme.borderDark : const Color(0xFFF0E4D3))),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : AppTheme.textPrimary,
+            color: selected
+                ? Colors.white
+                : (isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary),
             fontWeight: FontWeight.w500,
           ),
         ),

@@ -236,9 +236,17 @@ class _PlanCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.accentOrangeLight : Colors.white,
+          color: selected
+              ? AppTheme.accentOrangeLight
+              : (Theme.of(context).cardTheme.color ?? Colors.white),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? AppTheme.accentOrange : const Color(0xFFF0E4D3), width: selected ? 1.5 : 1),
+          border: Border.all(
+              color: selected
+                  ? AppTheme.accentOrange
+                  : (Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.borderDark
+                      : const Color(0xFFF0E4D3)),
+              width: selected ? 1.5 : 1),
         ),
         child: Row(
           children: [

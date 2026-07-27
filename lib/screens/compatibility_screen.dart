@@ -321,7 +321,13 @@ class _PersonFormState extends State<_PersonForm> {
             if (_suggestions.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFF0E4D3))),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardTheme.color ?? Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.borderDark
+                      : const Color(0xFFF0E4D3)),
+                ),
                 child: Column(
                   children: _suggestions.map((city) {
                     return ListTile(

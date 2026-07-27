@@ -257,9 +257,15 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
       decoration: BoxDecoration(
-        color: isUser ? AppTheme.primaryBrown : Colors.white,
+        color: isUser
+            ? AppTheme.primaryBrown
+            : Theme.of(context).cardTheme.color ?? Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: isUser ? null : Border.all(color: const Color(0xFFEDEBF5)),
+        border: isUser
+            ? null
+            : Border.all(color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.borderDark
+                : const Color(0xFFEDEBF5)),
       ),
       child: isUser
           ? Text(message.content, style: const TextStyle(color: Colors.white, height: 1.4))
