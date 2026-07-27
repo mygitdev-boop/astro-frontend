@@ -196,6 +196,37 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  // ---- Panchang ----
+
+  static Future<Map<String, dynamic>> getTodaysPanchang({
+    double? latitude,
+    double? longitude,
+    double? tzOffsetHours,
+  }) async {
+    final params = <String, String>{};
+    if (latitude != null) params['latitude'] = '$latitude';
+    if (longitude != null) params['longitude'] = '$longitude';
+    if (tzOffsetHours != null) params['tz_offset_hours'] = '$tzOffsetHours';
+    final uri = _base.replace(path: '/panchang/today', queryParameters: params.isEmpty ? null : params);
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Compatibility ----
+
+  static Future<Map<String, dynamic>> checkCompatibility({
+    required Map<String, dynamic> personA,
+    required Map<String, dynamic> personB,
+    String language = 'en',
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/compatibility/check'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'person_a': personA, 'person_b': personB, 'language': language}),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Festivals ----
 
   static Future<Map<String, dynamic>> getUpcomingFestivals({int limit = 5}) async {

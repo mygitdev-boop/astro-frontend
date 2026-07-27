@@ -21,12 +21,23 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   bool _needsKundli = false;
 
   List<dynamic> _festivals = [];
+  Map<String, dynamic>? _panchang;
 
   @override
   void initState() {
     super.initState();
     _loadFeed();
     _loadFestivals(); // independent of kundli -- always available
+    _loadPanchang();  // also independent -- pure astronomy, no kundli needed
+  }
+
+  Future<void> _loadPanchang() async {
+    try {
+      final result = await ApiService.getTodaysPanchang();
+      if (mounted) setState(() => _panchang = result);
+    } catch (_) {
+      // Non-critical -- skip silently if this fails
+    }
   }
 
   Future<void> _loadFestivals() async {
@@ -95,6 +106,41 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     );
   }
 
+  Widget _buildPanchangCard() {
+    final p = _panchang!;
+    final tithi = p['tithi'] as Map<String, dynamic>?;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.wb_sunny_outlined, size: 18, color: AppTheme.accentOrange),
+                const SizedBox(width: 8),
+                Text("Today's panchang", style: Theme.of(context).textTheme.titleMedium),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                if (tithi != null) _PanchangItem(label: 'Tithi', value: '${tithi['name']} (${tithi['paksha']})'),
+                if (p['nakshatra'] != null) _PanchangItem(label: 'Nakshatra', value: p['nakshatra']),
+                if (p['yoga'] != null) _PanchangItem(label: 'Yoga', value: p['yoga']),
+                if (p['karana'] != null) _PanchangItem(label: 'Karana', value: p['karana']),
+                if (p['sunrise'] != null) _PanchangItem(label: 'Sunrise', value: p['sunrise']),
+                if (p['sunset'] != null) _PanchangItem(label: 'Sunset', value: p['sunset']),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildNeedsKundli() {
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -118,6 +164,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           onPressed: _openBirthDetails,
           child: const Text('Generate my kundli'),
         ),
+        if (_panchang != null) ...[
+          const SizedBox(height: 32),
+          _buildPanchangCard(),
+        ],
         if (_festivals.isNotEmpty) ...[
           const SizedBox(height: 32),
           _buildFestivalsCard(),
@@ -203,6 +253,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         _buildDashaCard(dasha),
         const SizedBox(height: 16),
         _buildLuckyCard(lucky),
+        if (_panchang != null) ...[
+          const SizedBox(height: 16),
+          _buildPanchangCard(),
+        ],
         if (_festivals.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildFestivalsCard(),
@@ -435,6 +489,26 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           context,
           MaterialPageRoute(builder: (_) => ChatScreen(initialCategory: continueChat['category'])),
         ),
+      ),
+    );
+  }
+}
+
+class _PanchangItem extends StatelessWidget {
+  final String label;
+  final String value;
+  const _PanchangItem({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 140,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+        ],
       ),
     );
   }
