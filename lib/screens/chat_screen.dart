@@ -8,7 +8,8 @@ import 'ai_history_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialCategory;
-  const ChatScreen({super.key, this.initialCategory});
+  final String? initialQuestion;
+  const ChatScreen({super.key, this.initialCategory, this.initialQuestion});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -37,6 +38,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory;
+    if (widget.initialQuestion != null) {
+      _controller.text = widget.initialQuestion!;
+    }
     _loadQuickQuestions();
   }
 

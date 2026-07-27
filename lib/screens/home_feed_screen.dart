@@ -6,6 +6,7 @@ import '../widgets/banner_ad_widget.dart';
 import 'chat_screen.dart';
 import 'birth_details_screen.dart';
 import 'reports_screen.dart';
+import 'search_screen.dart';
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -91,7 +92,19 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Astro BhavishyaAI')),
+      appBar: AppBar(
+        title: const Text('Astro BhavishyaAI'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: _loadFeed,
         child: _loading
