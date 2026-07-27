@@ -135,6 +135,18 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getYogasDoshas(
+    int userId, {
+    String? language,
+  }) async {
+    final uri = _base.replace(
+      path: '/users/$userId/yogas-doshas',
+      queryParameters: language != null ? {'language': language} : null,
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Home feed ----
 
   static Future<Map<String, dynamic>> getHomeFeed(
