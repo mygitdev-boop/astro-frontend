@@ -2,29 +2,30 @@ import 'package:flutter/material.dart';
 
 /// Astro BhavishyaAI -- app-wide theme.
 ///
-/// Color choice: deep indigo (night sky / cosmic feel) as the primary,
-/// warm saffron/amber as the accent (traditional, culturally resonant
-/// for an Indian astrology app, and gives good contrast for CTAs).
+/// Palette matches the app's visual identity: warm cream background,
+/// deep brown text, and a vivid orange/amber accent -- traditional and
+/// culturally resonant for an Indian astrology app.
 class AppTheme {
-  static const Color primaryIndigo = Color(0xFF2D2A5E);
-  static const Color primaryIndigoDark = Color(0xFF1C1A3E);
-  static const Color accentSaffron = Color(0xFFE8940C);
-  static const Color accentSaffronLight = Color(0xFFFFF3DE);
-  static const Color backgroundLight = Color(0xFFFAF9F6);
+  static const Color primaryBrown = Color(0xFF4A2C1A);
+  static const Color primaryBrownDark = Color(0xFF2E1B10);
+  static const Color accentOrange = Color(0xFFE8720C);
+  static const Color accentOrangeLight = Color(0xFFFFE8CC);
+  static const Color accentYellow = Color(0xFFF5A623);
+  static const Color backgroundCream = Color(0xFFFFF8EE);
   static const Color cardWhite = Color(0xFFFFFFFF);
-  static const Color textPrimary = Color(0xFF1C1A2E);
-  static const Color textSecondary = Color(0xFF6B6880);
+  static const Color textPrimary = Color(0xFF3A2417);
+  static const Color textSecondary = Color(0xFF8A7460);
   static const Color success = Color(0xFF2E9E5B);
   static const Color warning = Color(0xFFD9531E);
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: backgroundLight,
+      scaffoldBackgroundColor: backgroundCream,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryIndigo,
-        primary: primaryIndigo,
-        secondary: accentSaffron,
+        seedColor: accentOrange,
+        primary: accentOrange,
+        secondary: accentYellow,
         surface: cardWhite,
         brightness: Brightness.light,
       ),
@@ -44,7 +45,7 @@ class AppTheme {
         bodySmall: TextStyle(fontSize: 12, color: textSecondary),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: backgroundLight,
+        backgroundColor: backgroundCream,
         foregroundColor: textPrimary,
         elevation: 0,
         centerTitle: false,
@@ -57,12 +58,12 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFEDEBF5), width: 1),
+          side: const BorderSide(color: Color(0xFFF0E4D3), width: 1),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryIndigo,
+          backgroundColor: accentOrange,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -70,20 +71,27 @@ class AppTheme {
           elevation: 0,
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: cardWhite,
+        indicatorColor: accentOrangeLight,
+        labelTextStyle: WidgetStateProperty.all(
+          const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: textPrimary),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: cardWhite,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFEDEBF5)),
+          borderSide: const BorderSide(color: Color(0xFFF0E4D3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFEDEBF5)),
+          borderSide: const BorderSide(color: Color(0xFFF0E4D3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryIndigo, width: 1.5),
+          borderSide: const BorderSide(color: accentOrange, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),

@@ -82,7 +82,7 @@ class _KundliScreenState extends State<KundliScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 60),
-        const Icon(Icons.auto_stories_outlined, size: 56, color: AppTheme.primaryIndigo),
+        const Icon(Icons.auto_stories_outlined, size: 56, color: AppTheme.primaryBrown),
         const SizedBox(height: 20),
         Text(
           "You haven't generated your kundli yet",
@@ -141,7 +141,7 @@ class _ChartChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.accentSaffronLight,
+        color: AppTheme.accentOrangeLight,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(label, style: const TextStyle(color: AppTheme.warning, fontSize: 12, fontWeight: FontWeight.w500)),

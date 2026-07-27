@@ -21,6 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _nameController = TextEditingController();
 
   String _language = 'en';
+  String? _gender;
   bool _loading = false;
   String? _error;
 
@@ -40,6 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final user = await ApiService.createUser(
         phoneNumber: _phoneController.text.trim(),
         name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        gender: _gender,
         languagePref: _language,
       );
       UserSession.setUser(
@@ -71,27 +73,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
-                const Icon(Icons.nights_stay_rounded, size: 56, color: AppTheme.primaryIndigo),
+                const SizedBox(height: 32),
+                Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 96,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.nights_stay_rounded, size: 56, color: AppTheme.primaryBrown),
+                  ),
+                ),
                 const SizedBox(height: 16),
-                Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineMedium),
+                Center(child: Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineMedium)),
                 const SizedBox(height: 6),
-                Text(AppConfig.appTagline, style: Theme.of(context).textTheme.bodyMedium),
+                Center(child: Text(AppConfig.appTagline, style: Theme.of(context).textTheme.bodyMedium)),
                 const SizedBox(height: 32),
                 const Text('Choose your language', style: TextStyle(fontWeight: FontWeight.w500)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _LanguageChip(
+                    _ChoiceChipPill(
                       label: 'English',
                       selected: _language == 'en',
                       onTap: () => setState(() => _language = 'en'),
                     ),
                     const SizedBox(width: 12),
-                    _LanguageChip(
+                    _ChoiceChipPill(
                       label: 'हिन्दी',
                       selected: _language == 'hi',
                       onTap: () => setState(() => _language = 'hi'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Text('Gender', style: TextStyle(fontWeight: FontWeight.w500)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _ChoiceChipPill(
+                      label: 'Male',
+                      selected: _gender == 'male',
+                      onTap: () => setState(() => _gender = 'male'),
+                    ),
+                    const SizedBox(width: 12),
+                    _ChoiceChipPill(
+                      label: 'Female',
+                      selected: _gender == 'female',
+                      onTap: () => setState(() => _gender = 'female'),
+                    ),
+                    const SizedBox(width: 12),
+                    _ChoiceChipPill(
+                      label: 'Other',
+                      selected: _gender == 'other',
+                      onTap: () => setState(() => _gender = 'other'),
                     ),
                   ],
                 ),
@@ -135,22 +168,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class _LanguageChip extends StatelessWidget {
+class _ChoiceChipPill extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _LanguageChip({required this.label, required this.selected, required this.onTap});
+  const _ChoiceChipPill({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryIndigo : Colors.white,
+          color: selected ? AppTheme.primaryBrown : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? AppTheme.primaryIndigo : const Color(0xFFEDEBF5)),
+          border: Border.all(color: selected ? AppTheme.primaryBrown : const Color(0xFFF0E4D3)),
         ),
         child: Text(
           label,

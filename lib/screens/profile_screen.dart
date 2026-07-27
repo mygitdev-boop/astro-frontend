@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/user_session.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'onboarding_screen.dart';
 import 'birth_details_screen.dart';
@@ -15,12 +16,58 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _updatingLanguage = false;
+
   Future<void> _openBirthDetails() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const BirthDetailsScreen()),
     );
     if (result == true) setState(() {}); // refresh to show the new moon sign
+  }
+
+  Future<void> _changeLanguage() async {
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Choose your language', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            ),
+            ListTile(
+              title: const Text('English'),
+              trailing: UserSession.languagePref == 'en' ? const Icon(Icons.check, color: AppTheme.accentOrange) : null,
+              onTap: () => Navigator.pop(context, 'en'),
+            ),
+            ListTile(
+              title: const Text('हिन्दी'),
+              trailing: UserSession.languagePref == 'hi' ? const Icon(Icons.check, color: AppTheme.accentOrange) : null,
+              onTap: () => Navigator.pop(context, 'hi'),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null || chosen == UserSession.languagePref) return;
+
+    setState(() => _updatingLanguage = true);
+    try {
+      await ApiService.updateLanguage(userId: UserSession.userId!, languagePref: chosen);
+      UserSession.languagePref = chosen;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not update language: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _updatingLanguage = false);
+    }
   }
 
   @override
@@ -37,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   const CircleAvatar(
                     radius: 28,
-                    backgroundColor: AppTheme.accentSaffronLight,
+                    backgroundColor: AppTheme.accentOrangeLight,
                     child: Icon(Icons.person, color: AppTheme.warning, size: 28),
                   ),
                   const SizedBox(width: 16),
@@ -68,7 +115,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ListTile(
                   leading: const Icon(Icons.language_outlined),
                   title: const Text('Language'),
-                  trailing: Text(UserSession.languagePref == 'hi' ? 'हिन्दी' : 'English'),
+                  trailing: _updatingLanguage
+                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(UserSession.languagePref == 'hi' ? 'हिन्दी' : 'English'),
+                            const Icon(Icons.chevron_right, size: 18),
+                          ],
+                        ),
+                  onTap: _updatingLanguage ? null : _changeLanguage,
                 ),
                 const Divider(height: 1),
                 ListTile(

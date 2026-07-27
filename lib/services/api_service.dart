@@ -47,6 +47,7 @@ class ApiService {
   static Future<Map<String, dynamic>> createUser({
     required String phoneNumber,
     String? name,
+    String? gender,
     String languagePref = 'en',
   }) async {
     final res = await http.post(
@@ -55,8 +56,21 @@ class ApiService {
       body: jsonEncode({
         'phone_number': phoneNumber,
         'name': name,
+        'gender': gender,
         'language_pref': languagePref,
       }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> updateLanguage({
+    required int userId,
+    required String languagePref,
+  }) async {
+    final res = await http.patch(
+      _base.replace(path: '/users/$userId/language'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'language_pref': languagePref}),
     );
     return _handleResponse(res) as Map<String, dynamic>;
   }
@@ -179,6 +193,17 @@ class ApiService {
       headers: _jsonHeaders,
       body: jsonEncode({'primary_concern': primaryConcern}),
     );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  // ---- Festivals ----
+
+  static Future<Map<String, dynamic>> getUpcomingFestivals({int limit = 5}) async {
+    final uri = _base.replace(
+      path: '/festivals/upcoming',
+      queryParameters: {'limit': '$limit'},
+    );
+    final res = await http.get(uri);
     return _handleResponse(res) as Map<String, dynamic>;
   }
 

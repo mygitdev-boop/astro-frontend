@@ -18,10 +18,22 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   String? _error;
   bool _needsKundli = false;
 
+  List<dynamic> _festivals = [];
+
   @override
   void initState() {
     super.initState();
     _loadFeed();
+    _loadFestivals(); // independent of kundli -- always available
+  }
+
+  Future<void> _loadFestivals() async {
+    try {
+      final result = await ApiService.getUpcomingFestivals(limit: 3);
+      if (mounted) setState(() => _festivals = result['festivals'] ?? []);
+    } catch (_) {
+      // Non-critical -- silently skip if this fails, rest of the feed still works
+    }
   }
 
   Future<void> _loadFeed() async {
@@ -75,8 +87,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const SizedBox(height: 60),
-        const Icon(Icons.auto_awesome_outlined, size: 56, color: AppTheme.primaryIndigo),
+        const SizedBox(height: 40),
+        const Icon(Icons.auto_awesome_outlined, size: 56, color: AppTheme.primaryBrown),
         const SizedBox(height: 20),
         Text(
           'Generate your kundli to unlock your personalized feed',
@@ -94,7 +106,56 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           onPressed: _openBirthDetails,
           child: const Text('Generate my kundli'),
         ),
+        if (_festivals.isNotEmpty) ...[
+          const SizedBox(height: 32),
+          _buildFestivalsCard(),
+        ],
       ],
+    );
+  }
+
+  Widget _buildFestivalsCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.celebration_outlined, size: 18, color: AppTheme.accentOrange),
+                const SizedBox(width: 8),
+                Text('Upcoming festivals', style: Theme.of(context).textTheme.titleMedium),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ..._festivals.map((f) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 90,
+                        child: Text(
+                          f['date'] ?? '',
+                          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(f['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                            Text(f['significance'] ?? '', style: Theme.of(context).textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
     );
   }
 
@@ -130,6 +191,10 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         _buildDashaCard(dasha),
         const SizedBox(height: 16),
         _buildLuckyCard(lucky),
+        if (_festivals.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildFestivalsCard(),
+        ],
         const SizedBox(height: 16),
         _buildQuickQuestions(quickQuestions),
         const SizedBox(height: 16),
@@ -165,7 +230,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  const Icon(Icons.auto_awesome, size: 16, color: AppTheme.accentSaffron),
+                  const Icon(Icons.auto_awesome, size: 16, color: AppTheme.accentOrange),
                   const SizedBox(width: 6),
                   Text('Overall energy: $energy/10', style: const TextStyle(fontWeight: FontWeight.w500)),
                 ],
@@ -211,7 +276,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                     ...List.generate(5, (i) => Icon(
                           i < score ? Icons.star_rounded : Icons.star_outline_rounded,
                           size: 18,
-                          color: i < score ? AppTheme.accentSaffron : const Color(0xFFD8D5E6),
+                          color: i < score ? AppTheme.accentOrange : const Color(0xFFD8D5E6),
                         )),
                   ],
                 ),

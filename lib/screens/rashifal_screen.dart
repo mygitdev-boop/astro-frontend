@@ -76,7 +76,7 @@ class _RashifalScreenState extends State<RashifalScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 60),
-        const Icon(Icons.auto_awesome_outlined, size: 56, color: AppTheme.primaryIndigo),
+        const Icon(Icons.auto_awesome_outlined, size: 56, color: AppTheme.primaryBrown),
         const SizedBox(height: 20),
         Text(
           'Generate your kundli to see your rashifal',
