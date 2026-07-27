@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../config.dart';
 import '../services/api_service.dart';
@@ -5,6 +6,7 @@ import '../services/user_session.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import 'main_nav_screen.dart';
+import 'otp_verification_screen.dart';
 
 /// Registration: name + phone + language. Creates the user and goes
 /// straight to the home dashboard -- birth details / Kundli generation
@@ -38,6 +40,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _loading = true;
       _error = null;
     });
+
+    // Firebase Phone Auth doesn't work on Flutter Web -- fall back to the
+    // direct (unverified) registration path there so you can keep testing
+    // in Chrome. On Android/iOS, this goes through real OTP verification.
+    if (kIsWeb) {
+      await _registerDirectly();
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OtpVerificationScreen(
+          phoneNumber: _formattedPhoneNumber(),
+          name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+          gender: _gender,
+          languagePref: _language,
+        ),
+      ),
+    );
+  }
+
+  /// Assumes Indian numbers (+91) if no country code was typed -- adjust
+  /// if you expand beyond the Indian market.
+  String _formattedPhoneNumber() {
+    final raw = _phoneController.text.trim();
+    if (raw.startsWith('+')) return raw;
+    return '+91$raw';
+  }
+
+  Future<void> _registerDirectly() async {
     try {
       final user = await ApiService.createUser(
         phoneNumber: _phoneController.text.trim(),

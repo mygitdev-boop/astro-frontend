@@ -54,10 +54,7 @@ flutter run
   free questions/day
 
 ## Known gaps to fix before this is launch-ready
-1. **No OTP verification** -- phone number is currently just a text field with no
-   verification step. The original plan calls for Firebase Auth with OTP; that's not
-   wired in yet.
-2. **AdMob needs manual platform config** (can't be done from this lib/-only repo --
+1. **AdMob needs manual platform config** (can't be done from this lib/-only repo --
    edit these files directly in your local Flutter project):
 
    **Android** -- add to `android/app/src/main/AndroidManifest.xml`, inside `<application>`:
@@ -81,10 +78,10 @@ flutter run
    You need an Android emulator (via Android Studio) or a physical device to see
    these actually render.
 
-3. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
+2. **AdMob ad unit IDs are still Google's TEST IDs** -- see `lib/services/ads_service.dart`.
    Replace with your real ad unit IDs once you have an AdMob account and app registered.
 
-4. **Notifications need a Firebase project** (can't be done from this lib/-only repo):
+3. **Notifications need a Firebase project** (can't be done from this lib/-only repo):
 
    **Step 1**: Create a project at https://console.firebase.google.com
 
@@ -115,10 +112,17 @@ flutter run
    Until steps 2-5 are done, `NotificationService.initialize()` fails silently and the
    rest of the app works fine, just without push notifications.
 
-5. **razorpay_flutter needs Android minSdkVersion 19+** -- check
+4. **razorpay_flutter needs Android minSdkVersion 19+** -- check
    `android/app/build.gradle` has `minSdkVersion 19` or higher (Flutter's default is
    already 21+, so this is usually already fine, but worth confirming if you hit a
    build error). No other native setup is needed for Razorpay checkout itself.
+
+5. **OTP verification needs Phone enabled as a sign-in provider** -- in the same
+   Firebase project from step 3, go to Authentication -> Sign-in method -> Phone ->
+   Enable. Without this, sending an OTP will fail with a clear Firebase error.
+   Note: OTP verification only works on Android/iOS -- on Flutter Web, registration
+   automatically falls back to the simpler unverified path so you can keep testing
+   in Chrome (see `onboarding_screen.dart`).
 
 ## API base URL
 Set in `lib/config.dart`:

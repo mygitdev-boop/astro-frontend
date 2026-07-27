@@ -80,6 +80,25 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> registerWithVerifiedPhone({
+    required String idToken,
+    String? name,
+    String? gender,
+    String languagePref = 'en',
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/auth/register-with-phone'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'id_token': idToken,
+        'name': name,
+        'gender': gender,
+        'language_pref': languagePref,
+      }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Birth details / Kundli ----
 
   static Future<Map<String, dynamic>> submitBirthDetails({
