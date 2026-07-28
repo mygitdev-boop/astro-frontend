@@ -13,6 +13,8 @@ import 'rashifal_screen.dart';
 import 'compatibility_screen.dart';
 import 'remedies_screen.dart';
 import 'numerology_screen.dart';
+import 'birth_story_screen.dart';
+import 'yogas_doshas_screen.dart';
 import '../widgets/energy_gauge.dart';
 
 class HomeFeedScreen extends StatefulWidget {
@@ -459,6 +461,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       {'label': 'Reports', 'icon': Icons.description_outlined, 'builder': () => const ReportsScreen()},
       {'label': 'Remedies', 'icon': Icons.spa_outlined, 'builder': () => const RemediesScreen()},
       {'label': 'Numerology', 'icon': Icons.calculate_outlined, 'builder': () => const NumerologyScreen()},
+      {'label': 'Birth Story', 'icon': Icons.auto_stories_outlined, 'builder': () => const BirthStoryScreen()},
+      {'label': 'Yogas & Doshas', 'icon': Icons.stars_outlined, 'builder': () => const YogasDoshasScreen()},
     ];
 
     return Card(
