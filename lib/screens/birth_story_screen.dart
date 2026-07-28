@@ -55,9 +55,36 @@ class _BirthStoryScreenState extends State<BirthStoryScreen> {
                   ),
                 )
               : ListView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   children: [
-                    const Icon(Icons.auto_stories, size: 40, color: AppTheme.accentOrange),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.white24,
+                            child: Icon(Icons.auto_stories, color: Colors.white, size: 22),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Text(
+                              'At the moment you were born...',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Card(
                       child: Padding(

@@ -58,6 +58,35 @@ class _RemediesScreenState extends State<RemediesScreen> {
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.white24,
+                            child: Icon(Icons.spa, color: Colors.white, size: 22),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Text(
+                              'Remedies & Timing',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(20),
