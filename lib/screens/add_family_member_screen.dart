@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../services/geocoding_service.dart';
+import '../services/ads_service.dart';
 import '../theme/app_theme.dart';
+import 'subscription_screen.dart';
 
 class AddFamilyMemberScreen extends StatefulWidget {
   const AddFamilyMemberScreen({super.key});
@@ -96,27 +98,99 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
       _error = null;
     });
     try {
-      await ApiService.addFamilyMember(
-        userId: UserSession.userId!,
-        name: _nameController.text.trim(),
-        relation: _relation,
-        gender: _gender,
-        date: _dateController.text,
-        time: _timeController.text,
-        tzOffsetHours: _tzOffset,
-        latitude: _selectedCity!.latitude,
-        longitude: _selectedCity!.longitude,
-        placeName: _selectedCity!.displayLabel,
-      );
+      await _attemptAdd();
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } on ApiException catch (e) {
-      setState(() => _error = e.message);
+      if (e.statusCode == 403) {
+        // Real premium gate -- offer the ad-unlock/upgrade choice rather
+        // than just showing the raw error.
+        await _handlePremiumGate();
+      } else {
+        setState(() => _error = e.message);
+      }
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _attemptAdd() async {
+    await ApiService.addFamilyMember(
+      userId: UserSession.userId!,
+      name: _nameController.text.trim(),
+      relation: _relation,
+      gender: _gender,
+      date: _dateController.text,
+      time: _timeController.text,
+      tzOffsetHours: _tzOffset,
+      latitude: _selectedCity!.latitude,
+      longitude: _selectedCity!.longitude,
+      placeName: _selectedCity!.displayLabel,
+    );
+  }
+
+  Future<void> _handlePremiumGate() async {
+    if (!mounted) return;
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Premium feature'),
+        content: const Text(
+          'Family Profiles is a premium feature. Upgrade for unlimited access, or watch a short ad to add this one family member for free.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, 'cancel'), child: const Text('Not now')),
+          TextButton(onPressed: () => Navigator.pop(context, 'ad'), child: const Text('Watch ad')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, 'upgrade'), child: const Text('Upgrade')),
+        ],
+      ),
+    );
+
+    if (choice == 'upgrade' && mounted) {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const SubscriptionScreen()));
+      return;
+    }
+
+    if (choice == 'ad') {
+      await _watchAdAndRetry();
+    }
+  }
+
+  Future<void> _watchAdAndRetry() async {
+    if (!AdsService.isRewardedReady) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ad is still loading -- please try again in a moment.')),
+        );
+      }
+      return;
+    }
+
+    setState(() => _loading = true);
+    AdsService.showRewarded(
+      onRewardEarned: () async {
+        try {
+          await ApiService.rewardPremiumUnlock(UserSession.userId!);
+          await _attemptAdd(); // retry immediately, spending the credit we just earned
+          if (!mounted) return;
+          Navigator.of(context).pop(true);
+        } catch (e) {
+          if (mounted) setState(() => _error = e.toString());
+        } finally {
+          if (mounted) setState(() => _loading = false);
+        }
+      },
+      onNotReady: () {
+        if (mounted) {
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ad not available right now -- please try again shortly.')),
+          );
+        }
+      },
+    );
   }
 
   @override

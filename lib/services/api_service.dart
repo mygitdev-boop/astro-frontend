@@ -394,6 +394,11 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> rewardPremiumUnlock(int userId) async {
+    final res = await http.post(_base.replace(path: '/users/$userId/reward-premium-unlock'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   static Future<Map<String, dynamic>> registerFcmToken({
     required int userId,
     required String fcmToken,

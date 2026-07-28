@@ -4,7 +4,6 @@ import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'add_family_member_screen.dart';
 import 'family_member_detail_screen.dart';
-import 'subscription_screen.dart';
 
 class FamilyProfilesScreen extends StatefulWidget {
   const FamilyProfilesScreen({super.key});
@@ -49,24 +48,10 @@ class _FamilyProfilesScreenState extends State<FamilyProfilesScreen> {
   }
 
   Future<void> _handleAddPressed() async {
-    if (!UserSession.isPremium) {
-      final upgrade = await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Premium feature'),
-          content: const Text('Family Profiles is a premium feature. Upgrade to add family members and see everyone\'s dashboard.'),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Not now')),
-            ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Upgrade')),
-          ],
-        ),
-      );
-      if (upgrade == true && mounted) {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const SubscriptionScreen()));
-      }
-      return;
-    }
-
+    // No client-side premium pre-check here -- UserSession.isPremium doesn't
+    // know about bonus ad-unlock credits. The actual POST /family call is
+    // the real gate; AddFamilyMemberScreen handles a 403 by offering the
+    // ad-unlock/upgrade choice.
     final added = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddFamilyMemberScreen()),
