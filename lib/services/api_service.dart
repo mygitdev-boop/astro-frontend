@@ -348,6 +348,15 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getNumerology(int userId, {String? language}) async {
+    final uri = _base.replace(
+      path: '/users/$userId/numerology',
+      queryParameters: language != null ? {'language': language} : null,
+    );
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Compatibility ----
 
   static Future<Map<String, dynamic>> checkCompatibility({

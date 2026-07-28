@@ -12,6 +12,7 @@ import 'kundli_screen.dart';
 import 'rashifal_screen.dart';
 import 'compatibility_screen.dart';
 import 'remedies_screen.dart';
+import 'numerology_screen.dart';
 import '../widgets/energy_gauge.dart';
 
 class HomeFeedScreen extends StatefulWidget {
@@ -361,13 +362,11 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       children: [
         _buildGreetingCard(feed, lucky),
         const SizedBox(height: 16),
-        _buildTodaysHighlights(ratings),
+        _buildQuickActions(),
         const SizedBox(height: 16),
         _buildAskAiPromo(),
         const SizedBox(height: 16),
-        _buildQuickActions(),
-        const SizedBox(height: 16),
-        _buildDashaCard(dasha),
+        _buildTodaysHighlights(ratings),
         if (_panchang != null) ...[
           const SizedBox(height: 16),
           _buildPanchangCard(),
@@ -376,6 +375,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           const SizedBox(height: 16),
           _buildDevotionalCard(),
         ],
+        const SizedBox(height: 16),
+        _buildDashaCard(dasha),
         if (_festivals.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildFestivalsCard(),
@@ -457,6 +458,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       {'label': 'Compatibility', 'icon': Icons.favorite_outline, 'builder': () => const CompatibilityScreen()},
       {'label': 'Reports', 'icon': Icons.description_outlined, 'builder': () => const ReportsScreen()},
       {'label': 'Remedies', 'icon': Icons.spa_outlined, 'builder': () => const RemediesScreen()},
+      {'label': 'Numerology', 'icon': Icons.calculate_outlined, 'builder': () => const NumerologyScreen()},
     ];
 
     return Card(
