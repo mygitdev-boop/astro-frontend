@@ -278,6 +278,56 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> addFamilyMember({
+    required int userId,
+    required String name,
+    required String relation,
+    String? gender,
+    required String date,
+    required String time,
+    required double tzOffsetHours,
+    required double latitude,
+    required double longitude,
+    String? placeName,
+  }) async {
+    final res = await http.post(
+      _base.replace(path: '/users/$userId/family'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'name': name,
+        'relation': relation,
+        'gender': gender,
+        'date': date,
+        'time': time,
+        'tz_offset_hours': tzOffsetHours,
+        'latitude': latitude,
+        'longitude': longitude,
+        'place_name': placeName,
+      }),
+    );
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getFamilyMembers(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/family'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getFamilyMemberDetail(int userId, int memberId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/family/$memberId'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getFamilyMemberExplanation(int userId, int memberId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/family/$memberId/kundli-explanation'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<void> deleteFamilyMember(int userId, int memberId) async {
+    final res = await http.delete(_base.replace(path: '/users/$userId/family/$memberId'));
+    _handleResponse(res);
+  }
+
   // ---- Compatibility ----
 
   static Future<Map<String, dynamic>> checkCompatibility({

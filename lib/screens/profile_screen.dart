@@ -6,6 +6,7 @@ import 'onboarding_screen.dart';
 import 'birth_details_screen.dart';
 import 'subscription_screen.dart';
 import 'settings_screen.dart';
+import 'family_profiles_screen.dart';
 
 /// Basic profile screen. Covers the core items from the screen spec
 /// (name, birth details summary, language, logout); subscription status,
@@ -156,6 +157,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.family_restroom_outlined),
+              title: const Text('Family Profiles'),
+              trailing: const Icon(Icons.chevron_right, size: 18),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FamilyProfilesScreen()),
+              ),
             ),
           ),
           const SizedBox(height: 16),
