@@ -8,6 +8,11 @@ import 'birth_details_screen.dart';
 import 'reports_screen.dart';
 import 'search_screen.dart';
 import 'learning_screen.dart';
+import 'kundli_screen.dart';
+import 'rashifal_screen.dart';
+import 'compatibility_screen.dart';
+import 'remedies_screen.dart';
+import '../widgets/energy_gauge.dart';
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -354,13 +359,15 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildGreetingCard(feed),
+        _buildGreetingCard(feed, lucky),
         const SizedBox(height: 16),
         _buildTodaysHighlights(ratings),
         const SizedBox(height: 16),
-        _buildDashaCard(dasha),
+        _buildAskAiPromo(),
         const SizedBox(height: 16),
-        _buildLuckyCard(lucky),
+        _buildQuickActions(),
+        const SizedBox(height: 16),
+        _buildDashaCard(dasha),
         if (_panchang != null) ...[
           const SizedBox(height: 16),
           _buildPanchangCard(),
@@ -388,42 +395,106 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     );
   }
 
-  Widget _buildGreetingCard(Map<String, dynamic> feed) {
-    final name = UserSession.name ?? 'there';
-    final energy = feed['energy_score'];
+  Widget _buildAskAiPromo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ask Astro Guru',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Get instant answers to your questions',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
+                ),
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ChatScreen()),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentOrange,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.auto_awesome, size: 16),
+                  label: const Text('Ask Now'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          const CircleAvatar(
+            radius: 32,
+            backgroundColor: Colors.white24,
+            child: Icon(Icons.auto_awesome, color: Colors.white, size: 30),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    final actions = [
+      {'label': 'Kundli', 'icon': Icons.auto_awesome_outlined, 'builder': () => const KundliScreen()},
+      {'label': 'Rashifal', 'icon': Icons.calendar_today_outlined, 'builder': () => const RashifalScreen()},
+      {'label': 'AI Chat', 'icon': Icons.chat_bubble_outline, 'builder': () => const ChatScreen()},
+      {'label': 'Compatibility', 'icon': Icons.favorite_outline, 'builder': () => const CompatibilityScreen()},
+      {'label': 'Reports', 'icon': Icons.description_outlined, 'builder': () => const ReportsScreen()},
+      {'label': 'Remedies', 'icon': Icons.spa_outlined, 'builder': () => const RemediesScreen()},
+    ];
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Good morning, $name', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 10),
-            Text(feed['greeting_line'] ?? '', style: Theme.of(context).textTheme.bodyLarge),
-            if (feed['caution_line'] != null) ...[
-              const SizedBox(height: 6),
-              Text(feed['caution_line'], style: Theme.of(context).textTheme.bodyMedium),
-            ],
-            if (energy != null) ...[
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  const Icon(Icons.auto_awesome, size: 16, color: AppTheme.accentOrange),
-                  const SizedBox(width: 6),
-                  Text('Overall energy: $energy/10', style: const TextStyle(fontWeight: FontWeight.w500)),
-                ],
-              ),
-            ],
+            Text('Quick actions', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ChatScreen()),
-                ),
-                child: const Text('Ask AI astrologer'),
-              ),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 8,
+              childAspectRatio: 0.95,
+              children: actions.map((a) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => (a['builder'] as Widget Function())()),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundColor: AppTheme.accentOrangeLight,
+                        child: Icon(a['icon'] as IconData, color: AppTheme.accentOrange, size: 20),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(a['label'] as String, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -431,35 +502,138 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     );
   }
 
-  Widget _buildTodaysHighlights(Map<String, dynamic> ratings) {
-    const labels = {
-      'love': 'Love', 'career': 'Career', 'money': 'Money',
-      'health': 'Health', 'family': 'Family',
-    };
+  Widget _buildGreetingCard(Map<String, dynamic> feed, Map<String, dynamic> lucky) {
+    final name = UserSession.name ?? 'there';
+    final energy = feed['energy_score'];
+    final now = DateTime.now();
+    final dateLabel = '${now.day} ${_monthName(now.month)} ${now.year}, ${_weekdayName(now.weekday)}';
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Today's highlights", style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            ...labels.entries.map((e) {
-              final score = (ratings[e.key] ?? 0) as int;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    SizedBox(width: 70, child: Text(e.value, style: Theme.of(context).textTheme.bodyMedium)),
-                    ...List.generate(5, (i) => Icon(
-                          i < score ? Icons.star_rounded : Icons.star_outline_rounded,
-                          size: 18,
-                          color: i < score ? AppTheme.accentOrange : const Color(0xFFD8D5E6),
-                        )),
-                  ],
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Good morning, $name', style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 6),
+                      Text(feed['greeting_line'] ?? '', style: Theme.of(context).textTheme.bodyMedium),
+                    ],
+                  ),
                 ),
-              );
-            }),
+                const Icon(Icons.wb_sunny_rounded, color: AppTheme.accentYellow, size: 28),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(dateLabel, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.accentOrangeLight,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  if (energy != null) ...[
+                    EnergyGauge(score: (energy as num).toDouble(), size: 84),
+                    const SizedBox(width: 18),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (lucky['color'] != null) _LuckyRow(icon: Icons.circle, label: 'Lucky Color', value: lucky['color']),
+                        if (lucky['number'] != null) ...[
+                          const SizedBox(height: 8),
+                          _LuckyRow(icon: Icons.tag, label: 'Lucky Number', value: '${lucky['number']}'),
+                        ],
+                        if (lucky['best_time'] != null) ...[
+                          const SizedBox(height: 8),
+                          _LuckyRow(icon: Icons.schedule, label: 'Best Time', value: lucky['best_time']),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (feed['caution_line'] != null) ...[
+              const SizedBox(height: 12),
+              Text(feed['caution_line'], style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _monthName(int m) => const [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ][m - 1];
+
+  String _weekdayName(int w) => const [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+      ][w - 1];
+
+  Widget _buildTodaysHighlights(Map<String, dynamic> ratings) {
+    const items = [
+      {'key': 'love', 'label': 'Love', 'icon': Icons.favorite, 'color': Color(0xFFE85D75)},
+      {'key': 'career', 'label': 'Career', 'icon': Icons.work, 'color': Color(0xFF4A7FE8)},
+      {'key': 'money', 'label': 'Money', 'icon': Icons.currency_rupee, 'color': Color(0xFF2E9E5B)},
+      {'key': 'health', 'label': 'Health', 'icon': Icons.self_improvement, 'color': Color(0xFF3EBFB0)},
+      {'key': 'family', 'label': 'Family', 'icon': Icons.groups, 'color': Color(0xFF9B6FE8)},
+    ];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Today's Highlights", style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 14),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: items.map((item) {
+                  final score = (ratings[item['key']] ?? 0) as int;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 14),
+                    child: SizedBox(
+                      width: 78,
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: (item['color'] as Color).withValues(alpha: 0.12),
+                            child: Icon(item['icon'] as IconData, color: item['color'] as Color, size: 22),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(item['label'] as String, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(5, (i) => Icon(
+                                  i < score ? Icons.star_rounded : Icons.star_outline_rounded,
+                                  size: 12,
+                                  color: i < score ? AppTheme.accentOrange : const Color(0xFFD8D5E6),
+                                )),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ],
         ),
       ),
@@ -470,42 +644,32 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text('Current dasha', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 10),
-            Text('${dasha['mahadasha'] ?? '--'} mahadasha', style: const TextStyle(fontWeight: FontWeight.w500)),
-            Text('${dasha['antardasha'] ?? '--'} antardasha', style: Theme.of(context).textTheme.bodyMedium),
-            if (dasha['next_change_date'] != null) ...[
-              const SizedBox(height: 10),
-              Text('Next major change: ${dasha['next_change_date']}', style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLuckyCard(Map<String, dynamic> lucky) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Today's lucky", style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: [
-                if (lucky['color'] != null) _LuckyItem(icon: Icons.circle, label: 'Color', value: lucky['color']),
-                if (lucky['number'] != null) _LuckyItem(icon: Icons.tag, label: 'Number', value: '${lucky['number']}'),
-                if (lucky['best_time'] != null) _LuckyItem(icon: Icons.schedule, label: 'Best time', value: lucky['best_time']),
-                if (lucky['avoid'] != null) _LuckyItem(icon: Icons.block, label: 'Avoid', value: lucky['avoid']),
-              ],
+            const CircleAvatar(
+              radius: 22,
+              backgroundColor: AppTheme.accentOrangeLight,
+              child: Icon(Icons.public, color: AppTheme.accentOrange, size: 20),
             ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Current Dasha', style: Theme.of(context).textTheme.bodySmall),
+                  Text('${dasha['mahadasha'] ?? '--'} Mahadasha', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  Text('${dasha['antardasha'] ?? '--'} Antardasha', style: const TextStyle(color: AppTheme.accentOrange, fontSize: 13)),
+                ],
+              ),
+            ),
+            if (dasha['next_change_date'] != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('Next change', style: Theme.of(context).textTheme.bodySmall),
+                  Text(dasha['next_change_date'], style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                ],
+              ),
           ],
         ),
       ),
@@ -637,21 +801,20 @@ class _PanchangItem extends StatelessWidget {
   }
 }
 
-class _LuckyItem extends StatelessWidget {
+class _LuckyRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _LuckyItem({required this.icon, required this.label, required this.value});
+  const _LuckyRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: AppTheme.textSecondary),
+        Icon(icon, size: 14, color: AppTheme.primaryBrown),
         const SizedBox(width: 6),
-        Text('$label: ', style: Theme.of(context).textTheme.bodySmall),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+        Text('$label: ', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primaryBrown)),
       ],
     );
   }
