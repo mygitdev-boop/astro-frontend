@@ -80,35 +80,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppTheme.accentOrangeLight,
-                    child: Icon(Icons.person, color: AppTheme.warning, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          UserSession.name ?? 'Guest',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          UserSession.phoneNumber ?? '',
-                          style: Theme.of(context).textTheme.bodyMedium,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                const CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white24,
+                  child: Icon(Icons.person, color: Colors.white, size: 30),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        UserSession.name ?? 'Guest',
+                        style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        UserSession.phoneNumber ?? '',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
+                      ),
+                      if (UserSession.isPremium) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentYellow,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star, size: 12, color: AppTheme.primaryBrownDark),
+                              SizedBox(width: 4),
+                              Text('Premium Member', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primaryBrownDark)),
+                            ],
+                          ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -144,11 +169,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ListTile(
                   leading: const Icon(Icons.workspace_premium_outlined),
                   title: const Text('Subscription'),
-                  trailing: const Row(
+                  trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Free'),
-                      Icon(Icons.chevron_right, size: 18),
+                      Text(UserSession.isPremium ? UserSession.planType.toUpperCase() : 'Free'),
+                      const Icon(Icons.chevron_right, size: 18),
                     ],
                   ),
                   onTap: () => Navigator.push(
