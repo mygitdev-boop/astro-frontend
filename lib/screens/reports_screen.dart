@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../config.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'subscription_screen.dart';
 import '../widgets/ai_markdown_text.dart';
 
-/// Reports grid -- Career/Marriage/Finance/Health/Education/Business.
+/// Reports grid -- Career/Marriage/Money/Business/Children/Health/Travel.
 /// Each card generates a detailed report via the existing /consultation
-/// endpoint (which is gated server-side to Monthly/Yearly plans only).
+/// endpoint (which is gated server-side to Monthly/Yearly plans only),
+/// and can also be downloaded as a branded PDF (bilingual, Hindi/English).
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
 
   static const _reportTypes = [
-    {'label': 'Career', 'icon': Icons.work_outline, 'concern': 'career prospects and growth'},
-    {'label': 'Marriage', 'icon': Icons.favorite_outline, 'concern': 'marriage and relationships'},
-    {'label': 'Finance', 'icon': Icons.currency_rupee, 'concern': 'wealth and financial growth'},
-    {'label': 'Health', 'icon': Icons.health_and_safety_outlined, 'concern': 'health and wellbeing'},
-    {'label': 'Education', 'icon': Icons.school_outlined, 'concern': 'education and learning'},
-    {'label': 'Business', 'icon': Icons.storefront_outlined, 'concern': 'business and entrepreneurship'},
+    {'label': 'Career', 'category': 'career', 'icon': Icons.work_outline, 'concern': 'career prospects and growth'},
+    {'label': 'Marriage', 'category': 'marriage', 'icon': Icons.favorite_outline, 'concern': 'marriage and relationships'},
+    {'label': 'Money', 'category': 'money', 'icon': Icons.currency_rupee, 'concern': 'wealth and financial growth'},
+    {'label': 'Business', 'category': 'business', 'icon': Icons.storefront_outlined, 'concern': 'business and entrepreneurship'},
+    {'label': 'Children', 'category': 'children', 'icon': Icons.child_friendly_outlined, 'concern': 'children and family planning'},
+    {'label': 'Health', 'category': 'health', 'icon': Icons.health_and_safety_outlined, 'concern': 'health and wellbeing'},
+    {'label': 'Travel', 'category': 'travel', 'icon': Icons.flight_outlined, 'concern': 'travel and relocation prospects'},
   ];
 
   @override
@@ -37,6 +41,7 @@ class ReportsScreen extends StatelessWidget {
           final report = _reportTypes[i];
           return _ReportCard(
             label: report['label'] as String,
+            category: report['category'] as String,
             icon: report['icon'] as IconData,
             concern: report['concern'] as String,
           );
@@ -48,9 +53,10 @@ class ReportsScreen extends StatelessWidget {
 
 class _ReportCard extends StatelessWidget {
   final String label;
+  final String category;
   final IconData icon;
   final String concern;
-  const _ReportCard({required this.label, required this.icon, required this.concern});
+  const _ReportCard({required this.label, required this.category, required this.icon, required this.concern});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +65,7 @@ class _ReportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ReportDetailScreen(label: label, concern: concern)),
+          MaterialPageRoute(builder: (_) => ReportDetailScreen(label: label, category: category, concern: concern)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -81,8 +87,9 @@ class _ReportCard extends StatelessWidget {
 /// on an active Monthly/Yearly plan (backend returns 403 for that case).
 class ReportDetailScreen extends StatefulWidget {
   final String label;
+  final String category;
   final String concern;
-  const ReportDetailScreen({super.key, required this.label, required this.concern});
+  const ReportDetailScreen({super.key, required this.label, required this.category, required this.concern});
 
   @override
   State<ReportDetailScreen> createState() => _ReportDetailScreenState();
@@ -93,6 +100,18 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   bool _loading = true;
   bool _needsUpgrade = false;
   String? _error;
+
+  Future<void> _downloadPdf() async {
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/users/${UserSession.userId}/report-pdf?category=${widget.category}&language=${UserSession.languagePref}',
+    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the PDF. Please try again.')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -148,6 +167,12 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                             padding: const EdgeInsets.all(20),
                             child: AiMarkdownText(data: _report ?? ''),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: _downloadPdf,
+                          icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                          label: const Text('Download as PDF'),
                         ),
                       ],
                     ),
