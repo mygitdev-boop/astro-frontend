@@ -600,39 +600,37 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
           children: [
             Text("Today's Highlights", style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: items.map((item) {
-                  final score = (ratings[item['key']] ?? 0) as int;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 14),
-                    child: SizedBox(
-                      width: 78,
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: (item['color'] as Color).withValues(alpha: 0.12),
-                            child: Icon(item['icon'] as IconData, color: item['color'] as Color, size: 22),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(item['label'] as String, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(5, (i) => Icon(
-                                  i < score ? Icons.star_rounded : Icons.star_outline_rounded,
-                                  size: 12,
-                                  color: i < score ? AppTheme.accentOrange : const Color(0xFFD8D5E6),
-                                )),
-                          ),
-                        ],
-                      ),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 8,
+              childAspectRatio: 0.85,
+              children: items.map((item) {
+                final score = (ratings[item['key']] ?? 0) as int;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: (item['color'] as Color).withValues(alpha: 0.12),
+                      child: Icon(item['icon'] as IconData, color: item['color'] as Color, size: 20),
                     ),
-                  );
-                }).toList(),
-              ),
+                    const SizedBox(height: 6),
+                    Text(item['label'] as String, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (i) => Icon(
+                            i < score ? Icons.star_rounded : Icons.star_outline_rounded,
+                            size: 11,
+                            color: i < score ? AppTheme.accentOrange : const Color(0xFFD8D5E6),
+                          )),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ],
         ),
