@@ -231,9 +231,45 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildEmptyState(List<dynamic> categoryQuestions) {
+    final name = UserSession.name ?? 'there';
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 26,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Hello $name! 👋', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(
+                      "I'm Astro Guru. How can I help you today?",
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 20),
         Text('Quick questions', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
@@ -253,6 +289,11 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(height: 20),
           ...categoryQuestions.map((q) => Card(
                 child: ListTile(
+                  leading: const CircleAvatar(
+                    radius: 16,
+                    backgroundColor: AppTheme.accentOrangeLight,
+                    child: Icon(Icons.help_outline, size: 16, color: AppTheme.accentOrange),
+                  ),
                   title: Text(q.toString()),
                   trailing: const Icon(Icons.arrow_forward, size: 16),
                   onTap: () => _send(q.toString()),
