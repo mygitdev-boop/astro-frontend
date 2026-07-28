@@ -156,6 +156,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       final result = await ApiService.detailedConsultation(
         userId: UserSession.userId!,
         primaryConcern: widget.concern,
+        category: widget.category,
       );
       setState(() => _report = result['answer']);
     } on ApiException catch (e) {

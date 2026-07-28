@@ -248,11 +248,12 @@ class ApiService {
   static Future<Map<String, dynamic>> detailedConsultation({
     required int userId,
     required String primaryConcern,
+    String? category,
   }) async {
     final res = await http.post(
       _base.replace(path: '/users/$userId/consultation'),
       headers: _jsonHeaders,
-      body: jsonEncode({'primary_concern': primaryConcern}),
+      body: jsonEncode({'primary_concern': primaryConcern, 'category': category}),
     );
     return _handleResponse(res) as Map<String, dynamic>;
   }
