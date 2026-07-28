@@ -93,53 +93,82 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
     );
   }
 
+  static const _zodiacSymbols = {
+    'Aries': '♈', 'Taurus': '♉', 'Gemini': '♊', 'Cancer': '♋',
+    'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Scorpio': '♏',
+    'Sagittarius': '♐', 'Capricorn': '♑', 'Aquarius': '♒', 'Pisces': '♓',
+  };
+
   Widget _buildResult() {
     final guna = _result!['guna_milan'];
     final kootas = guna['kootas'] as Map<String, dynamic>;
     final total = guna['total_score'];
     final totalMax = guna['total_max'];
     final percentage = guna['percentage'];
+    final signA = _result!['person_a_moon_sign'];
+    final signB = _result!['person_b_moon_sign'];
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Text('${_result!['person_a_moon_sign']} + ${_result!['person_b_moon_sign']}',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 16),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      height: 100, width: 100,
-                      child: CircularProgressIndicator(
-                        value: (percentage as num) / 100,
-                        strokeWidth: 8,
-                        backgroundColor: const Color(0xFFF0E4D3),
-                        color: percentage >= 60 ? AppTheme.success : AppTheme.accentOrange,
-                      ),
-                    ),
-                    Text('$percentage%', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text('$total / $totalMax Gunas', style: Theme.of(context).textTheme.bodyMedium),
-                if (guna['nadi_dosha'] == true || guna['bhakoot_dosha'] == true) ...[
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _ZodiacAvatar(symbol: _zodiacSymbols[signA] ?? '✦', label: signA ?? '--'),
+                  const SizedBox(width: 20),
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      if (guna['nadi_dosha'] == true) _DoshaChip(label: 'Nadi Dosha'),
-                      if (guna['bhakoot_dosha'] == true) _DoshaChip(label: 'Bhakoot Dosha'),
+                      SizedBox(
+                        height: 90, width: 90,
+                        child: CircularProgressIndicator(
+                          value: (percentage as num) / 100,
+                          strokeWidth: 8,
+                          backgroundColor: Colors.white24,
+                          color: percentage >= 60 ? AppTheme.success : AppTheme.accentYellow,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('$percentage%', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
+                          Text('Match', style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.7))),
+                        ],
+                      ),
                     ],
                   ),
+                  const SizedBox(width: 20),
+                  _ZodiacAvatar(symbol: _zodiacSymbols[signB] ?? '✦', label: signB ?? '--'),
                 ],
+              ),
+              const SizedBox(height: 14),
+              Text('$total / $totalMax Gunas', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w500)),
+              if (guna['nadi_dosha'] == true || guna['bhakoot_dosha'] == true) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    if (guna['nadi_dosha'] == true) _DoshaChip(label: 'Nadi Dosha'),
+                    if (guna['bhakoot_dosha'] == true) _DoshaChip(label: 'Bhakoot Dosha'),
+                  ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -204,6 +233,27 @@ class _DoshaChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(color: AppTheme.accentOrangeLight, borderRadius: BorderRadius.circular(8)),
       child: Text(label, style: const TextStyle(color: AppTheme.warning, fontSize: 12, fontWeight: FontWeight.w500)),
+    );
+  }
+}
+
+class _ZodiacAvatar extends StatelessWidget {
+  final String symbol;
+  final String label;
+  const _ZodiacAvatar({required this.symbol, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 26,
+          backgroundColor: Colors.white24,
+          child: Text(symbol, style: const TextStyle(fontSize: 24, color: Colors.white)),
+        ),
+        const SizedBox(height: 6),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 11, fontWeight: FontWeight.w500)),
+      ],
     );
   }
 }
