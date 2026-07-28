@@ -150,7 +150,13 @@ class _FamilyProfilesScreenState extends State<FamilyProfilesScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => FamilyMemberDetailScreen(memberId: m['id'], name: m['name'])),
+              MaterialPageRoute(
+                builder: (_) => FamilyMemberDetailScreen(
+                  memberId: m['id'],
+                  name: m['name'],
+                  relation: m['relation'],
+                ),
+              ),
             ),
           ),
         );

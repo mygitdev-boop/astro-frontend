@@ -7,7 +7,8 @@ import '../widgets/ai_markdown_text.dart';
 class FamilyMemberDetailScreen extends StatefulWidget {
   final int memberId;
   final String name;
-  const FamilyMemberDetailScreen({super.key, required this.memberId, required this.name});
+  final String? relation;
+  const FamilyMemberDetailScreen({super.key, required this.memberId, required this.name, this.relation});
 
   @override
   State<FamilyMemberDetailScreen> createState() => _FamilyMemberDetailScreenState();
@@ -16,9 +17,13 @@ class FamilyMemberDetailScreen extends StatefulWidget {
 class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
   Map<String, dynamic>? _chart;
   String? _explanation;
+  String? _childReport;
   bool _loading = true;
   bool _loadingExplanation = false;
+  bool _loadingChildReport = false;
   String? _error;
+
+  bool get _isChild => widget.relation == 'son' || widget.relation == 'daughter';
 
   @override
   void initState() {
@@ -35,6 +40,7 @@ class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
       final result = await ApiService.getFamilyMemberDetail(UserSession.userId!, widget.memberId);
       setState(() => _chart = result['chart']);
       _loadExplanation();
+      if (_isChild) _loadChildReport();
     } on ApiException catch (e) {
       setState(() => _error = e.message);
     } catch (e) {
@@ -53,6 +59,18 @@ class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
       // Non-critical -- dashboard summary still shows without the explanation
     } finally {
       if (mounted) setState(() => _loadingExplanation = false);
+    }
+  }
+
+  Future<void> _loadChildReport() async {
+    setState(() => _loadingChildReport = true);
+    try {
+      final result = await ApiService.getChildAstrologyReport(UserSession.userId!, widget.memberId);
+      if (mounted) setState(() => _childReport = result['report']);
+    } catch (_) {
+      // Non-critical -- rest of dashboard still shows
+    } finally {
+      if (mounted) setState(() => _loadingChildReport = false);
     }
   }
 
@@ -129,6 +147,35 @@ class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
                 : AiMarkdownText(data: _explanation ?? 'No explanation available yet.'),
           ),
         ),
+        if (_isChild) ...[
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.child_care, size: 18, color: AppTheme.accentOrange),
+                      const SizedBox(width: 8),
+                      Text('Child Astrology Report', style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Learning style, strengths, personality, and interests -- traditional interpretation, not a prediction.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  _loadingChildReport
+                      ? const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                      : AiMarkdownText(data: _childReport ?? 'No report available yet.'),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

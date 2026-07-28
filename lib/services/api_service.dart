@@ -323,6 +323,11 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getChildAstrologyReport(int userId, int memberId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/family/$memberId/child-report'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   static Future<void> deleteFamilyMember(int userId, int memberId) async {
     final res = await http.delete(_base.replace(path: '/users/$userId/family/$memberId'));
     _handleResponse(res);
