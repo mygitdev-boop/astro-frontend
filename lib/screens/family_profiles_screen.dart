@@ -117,7 +117,7 @@ class _FamilyProfilesScreenState extends State<FamilyProfilesScreen> {
 
   Widget _buildList() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 90 + MediaQuery.of(context).padding.bottom),
       children: _members.map((m) {
         final icon = _relationIcons[m['relation']] ?? Icons.person_outline;
         return Card(

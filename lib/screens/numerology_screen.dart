@@ -73,7 +73,7 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
 
   Widget _buildContent() {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
       children: [
         Container(
           width: double.infinity,
