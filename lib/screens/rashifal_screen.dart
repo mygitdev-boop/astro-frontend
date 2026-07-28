@@ -4,6 +4,7 @@ import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'birth_details_screen.dart';
 import '../widgets/ai_markdown_text.dart';
+import 'cosmic_calendar_screen.dart';
 
 class RashifalScreen extends StatefulWidget {
   const RashifalScreen({super.key});
@@ -86,7 +87,19 @@ class _RashifalScreenState extends State<RashifalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Rashifal${UserSession.moonSignRashi != null ? ' · ${UserSession.moonSignRashi}' : ''}')),
+      appBar: AppBar(
+        title: Text('Rashifal${UserSession.moonSignRashi != null ? ' · ${UserSession.moonSignRashi}' : ''}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: 'Cosmic Calendar',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CosmicCalendarScreen()),
+            ),
+          ),
+        ],
+      ),
       body: _needsKundli ? _buildNeedsKundli() : _buildTabsAndContent(),
     );
   }

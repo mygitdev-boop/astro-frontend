@@ -293,6 +293,12 @@ class ApiService {
     return _handleResponse(res) as Map<String, dynamic>;
   }
 
+  static Future<Map<String, dynamic>> getCosmicCalendar(String rashi, {String language = 'en'}) async {
+    final uri = _base.replace(path: '/cosmic-calendar/$rashi', queryParameters: {'language': language});
+    final res = await http.get(uri);
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Festivals ----
 
   static Future<Map<String, dynamic>> getUpcomingFestivals({int limit = 5}) async {
