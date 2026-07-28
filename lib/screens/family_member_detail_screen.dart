@@ -123,19 +123,25 @@ class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: [
-                _ChartChip(label: 'Ascendant', value: asc ?? '--'),
-                _ChartChip(label: 'Moon Sign', value: moon ?? '--'),
-                _ChartChip(label: 'Nakshatra', value: nakshatra ?? '--'),
-                if (dasha != null) _ChartChip(label: 'Mahadasha', value: dasha['current_mahadasha'] ?? '--'),
-              ],
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _HeaderStat(label: 'Ascendant', value: asc ?? '--'),
+              _HeaderStat(label: 'Moon Sign', value: moon ?? '--'),
+              _HeaderStat(label: 'Nakshatra', value: nakshatra ?? '--'),
+              if (dasha != null) _HeaderStat(label: 'Mahadasha', value: dasha['current_mahadasha'] ?? '--'),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -181,18 +187,18 @@ class _FamilyMemberDetailScreenState extends State<FamilyMemberDetailScreen> {
   }
 }
 
-class _ChartChip extends StatelessWidget {
+class _HeaderStat extends StatelessWidget {
   final String label;
   final String value;
-  const _ChartChip({required this.label, required this.value});
+  const _HeaderStat({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10)),
       ],
     );
   }
