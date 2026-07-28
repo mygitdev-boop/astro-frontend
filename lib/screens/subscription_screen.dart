@@ -155,9 +155,38 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.workspace_premium, size: 48, color: AppTheme.accentOrange),
-            const SizedBox(height: 12),
-            Text('Unlock the power of astrology', style: Theme.of(context).textTheme.headlineSmall),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CircleAvatar(
+                    radius: 26,
+                    backgroundColor: Colors.white24,
+                    child: Icon(Icons.workspace_premium, size: 26, color: Colors.white),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Unlock the power of astrology',
+                    style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Get unlimited access to everything Astro Guru offers',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 20),
             ..._benefits.map((b) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
