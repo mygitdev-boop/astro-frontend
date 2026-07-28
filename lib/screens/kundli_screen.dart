@@ -9,6 +9,8 @@ import 'reports_screen.dart';
 import 'compatibility_screen.dart';
 import 'yogas_doshas_screen.dart';
 import 'divisional_charts_screen.dart';
+import 'remedies_screen.dart';
+import 'birth_story_screen.dart';
 import '../widgets/ai_markdown_text.dart';
 
 class KundliScreen extends StatefulWidget {
@@ -193,6 +195,24 @@ class _KundliScreenState extends State<KundliScreen> {
           ),
           icon: const Icon(Icons.grid_view_outlined, size: 18),
           label: const Text('View divisional charts (D9/D10)'),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const RemediesScreen()),
+          ),
+          icon: const Icon(Icons.spa_outlined, size: 18),
+          label: const Text('Remedies & timing'),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BirthStoryScreen()),
+          ),
+          icon: const Icon(Icons.auto_stories_outlined, size: 18),
+          label: const Text('Your birth story'),
         ),
       ],
     );

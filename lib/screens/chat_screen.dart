@@ -175,7 +175,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ask AI astrologer'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircleAvatar(
+              radius: 14,
+              backgroundColor: AppTheme.accentOrangeLight,
+              child: Icon(Icons.auto_awesome, size: 14, color: AppTheme.accentOrange),
+            ),
+            const SizedBox(width: 10),
+            const Text('Astro Guru'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
