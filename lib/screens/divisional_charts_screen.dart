@@ -59,6 +59,19 @@ class _DivisionalChartsScreenState extends State<DivisionalChartsScreen> {
     );
   }
 
+  static const _planetIcons = {
+    'Sun': (Icons.wb_sunny, Color(0xFFE8720C)),
+    'Moon': (Icons.nightlight_round, Color(0xFF4A7FE8)),
+    'Mars': (Icons.local_fire_department, Color(0xFFD9531E)),
+    'Mercury': (Icons.eco, Color(0xFF2E9E5B)),
+    'Jupiter': (Icons.auto_awesome, Color(0xFFF5A623)),
+    'Venus': (Icons.favorite, Color(0xFFE85D9C)),
+    'Saturn': (Icons.hourglass_bottom, Color(0xFF5C6B7A)),
+    'Rahu': (Icons.blur_circular, Color(0xFF7E57A8)),
+    'Ketu': (Icons.blur_on, Color(0xFF8A7460)),
+    'Ascendant': (Icons.arrow_upward, Color(0xFFE8720C)),
+  };
+
   Widget _buildContent() {
     final planets = _d9!.keys.toList();
     const order = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
@@ -67,9 +80,40 @@ class _DivisionalChartsScreenState extends State<DivisionalChartsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          'D9 (Navamsa) relates to marriage and inner strength. D10 (Dasamsa) relates to career and public life.',
-          style: Theme.of(context).textTheme.bodyMedium,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.grid_view_rounded, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Divisional Charts', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'D9 (Navamsa): marriage & inner strength. D10 (Dasamsa): career & public life.',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -86,16 +130,32 @@ class _DivisionalChartsScreenState extends State<DivisionalChartsScreen> {
                 ),
               ),
               const Divider(height: 1),
-              ...sortedPlanets.map((planet) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 2, child: Text(planet, style: const TextStyle(fontWeight: FontWeight.w500))),
-                        Expanded(flex: 3, child: Text(_d9![planet] ?? '--', textAlign: TextAlign.center)),
-                        Expanded(flex: 3, child: Text(_d10![planet] ?? '--', textAlign: TextAlign.center)),
-                      ],
-                    ),
-                  )),
+              ...sortedPlanets.map((planet) {
+                final iconData = _planetIcons[planet];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: (iconData?.$2 ?? AppTheme.accentOrange).withValues(alpha: 0.12),
+                              child: Icon(iconData?.$1 ?? Icons.circle, size: 12, color: iconData?.$2 ?? AppTheme.accentOrange),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(child: Text(planet, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
+                          ],
+                        ),
+                      ),
+                      Expanded(flex: 3, child: Text(_d9![planet] ?? '--', textAlign: TextAlign.center)),
+                      Expanded(flex: 3, child: Text(_d10![planet] ?? '--', textAlign: TextAlign.center)),
+                    ],
+                  ),
+                );
+              }),
             ],
           ),
         ),
