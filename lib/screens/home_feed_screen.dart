@@ -7,6 +7,7 @@ import 'chat_screen.dart';
 import 'birth_details_screen.dart';
 import 'reports_screen.dart';
 import 'search_screen.dart';
+import 'learning_screen.dart';
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -117,6 +118,14 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
       appBar: AppBar(
         title: const Text('Astro BhavishyaAI'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.school_outlined),
+            tooltip: 'Astrology Learning',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LearningScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search',

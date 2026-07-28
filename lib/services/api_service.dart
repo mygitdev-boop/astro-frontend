@@ -333,6 +333,21 @@ class ApiService {
     _handleResponse(res);
   }
 
+  static Future<Map<String, dynamic>> getTodaysLesson(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/learning/today'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> completeLesson(int userId, String lessonId) async {
+    final res = await http.post(_base.replace(path: '/users/$userId/learning/$lessonId/complete'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getLearningProgress(int userId) async {
+    final res = await http.get(_base.replace(path: '/users/$userId/learning/progress'));
+    return _handleResponse(res) as Map<String, dynamic>;
+  }
+
   // ---- Compatibility ----
 
   static Future<Map<String, dynamic>> checkCompatibility({
