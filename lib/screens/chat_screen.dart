@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../services/ads_service.dart';
@@ -35,6 +36,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   static const int _interstitialEveryNExchanges = 3;
 
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _speechAvailable = false;
+  bool _listening = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +48,53 @@ class _ChatScreenState extends State<ChatScreen> {
       _controller.text = widget.initialQuestion!;
     }
     _loadQuickQuestions();
+    _initSpeech();
+  }
+
+  Future<void> _initSpeech() async {
+    // Fails gracefully (mic icon just won't respond) if the platform
+    // doesn't support it or the user denies the permission -- no crash.
+    // onStatus/onError are passed here since speech_to_text only accepts
+    // them once, on the single initialize() call for the app session.
+    try {
+      final available = await _speech.initialize(
+        onStatus: (status) {
+          if ((status == 'done' || status == 'notListening') && mounted) {
+            setState(() => _listening = false);
+          }
+        },
+        onError: (_) {
+          if (mounted) setState(() => _listening = false);
+        },
+      );
+      if (mounted) setState(() => _speechAvailable = available);
+    } catch (_) {
+      // Leave _speechAvailable false
+    }
+  }
+
+  Future<void> _toggleListening() async {
+    if (!_speechAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Voice input is not available on this device.')),
+      );
+      return;
+    }
+
+    if (_speech.isListening) {
+      await _speech.stop();
+      if (mounted) setState(() => _listening = false);
+      return;
+    }
+
+    setState(() => _listening = true);
+    await _speech.listen(
+      onResult: (result) {
+        setState(() => _controller.text = result.recognizedWords);
+      },
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
+    );
   }
 
   Future<void> _loadQuickQuestions() async {
@@ -162,6 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _speech.stop();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -359,11 +412,22 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                decoration: const InputDecoration(hintText: 'Ask about career, love, money...'),
+                decoration: InputDecoration(
+                  hintText: _listening ? 'Listening...' : 'Ask about career, love, money...',
+                ),
                 onSubmitted: _send,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
+            IconButton(
+              onPressed: _sending ? null : _toggleListening,
+              icon: Icon(
+                _listening ? Icons.mic : Icons.mic_none_outlined,
+                color: _listening ? AppTheme.warning : AppTheme.textSecondary,
+              ),
+              tooltip: 'Speak your question',
+            ),
+            const SizedBox(width: 4),
             IconButton.filled(
               onPressed: _sending ? null : () => _send(_controller.text),
               icon: const Icon(Icons.arrow_upward),
