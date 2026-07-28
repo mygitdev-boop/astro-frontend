@@ -90,25 +90,34 @@ class _LearningScreenState extends State<LearningScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.accentOrangeLight,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('$totalCompleted', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppTheme.primaryBrown)),
-                    Text('lessons completed', style: Theme.of(context).textTheme.bodySmall),
-                  ],
-                ),
-              ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 26,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.school, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$totalCompleted', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text('lessons completed', style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
         Text("Today's lesson", style: Theme.of(context).textTheme.titleMedium),
