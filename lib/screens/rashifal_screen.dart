@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/user_session.dart';
 import '../theme/app_theme.dart';
 import 'birth_details_screen.dart';
+import '../widgets/ai_markdown_text.dart';
 
 class RashifalScreen extends StatefulWidget {
   const RashifalScreen({super.key});
@@ -17,6 +18,9 @@ class _RashifalScreenState extends State<RashifalScreen> {
 
   int _selectedPeriod = 0;
   String? _content;
+  String? _luckyColor;
+  int? _luckyNumber;
+  String? _remedy;
   bool _loading = true;
   String? _error;
   bool _needsKundli = false;
@@ -58,7 +62,12 @@ class _RashifalScreenState extends State<RashifalScreen> {
         _periods[_selectedPeriod],
         language: UserSession.languagePref,
       );
-      setState(() => _content = result['content']);
+      setState(() {
+        _content = result['content'];
+        _luckyColor = result['lucky_color'];
+        _luckyNumber = result['lucky_number'];
+        _remedy = result['remedy'];
+      });
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
@@ -144,15 +153,68 @@ class _RashifalScreenState extends State<RashifalScreen> {
                         Card(
                           child: Padding(
                             padding: const EdgeInsets.all(20),
-                            child: Text(
-                              _content ?? 'No content available yet.',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
+                            child: AiMarkdownText(data: _content ?? 'No content available yet.'),
                           ),
                         ),
+                        if (_luckyColor != null || _luckyNumber != null || _remedy != null) ...[
+                          const SizedBox(height: 16),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Today's lucky & remedy", style: Theme.of(context).textTheme.titleMedium),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 20,
+                                    runSpacing: 10,
+                                    children: [
+                                      if (_luckyColor != null)
+                                        _LuckyChip(icon: Icons.circle, label: 'Color', value: _luckyColor!),
+                                      if (_luckyNumber != null)
+                                        _LuckyChip(icon: Icons.tag, label: 'Number', value: '$_luckyNumber'),
+                                    ],
+                                  ),
+                                  if (_remedy != null) ...[
+                                    const SizedBox(height: 14),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(Icons.spa_outlined, size: 16, color: AppTheme.accentOrange),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(_remedy!, style: Theme.of(context).textTheme.bodyMedium)),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
         ),
+      ],
+    );
+  }
+}
+
+class _LuckyChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _LuckyChip({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: AppTheme.accentOrange),
+        const SizedBox(width: 6),
+        Text('$label: ', style: Theme.of(context).textTheme.bodySmall),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
       ],
     );
   }
