@@ -15,13 +15,13 @@ class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
 
   static const _reportTypes = [
-    {'label': 'Career', 'category': 'career', 'icon': Icons.work_outline, 'concern': 'career prospects and growth'},
-    {'label': 'Marriage', 'category': 'marriage', 'icon': Icons.favorite_outline, 'concern': 'marriage and relationships'},
-    {'label': 'Money', 'category': 'money', 'icon': Icons.currency_rupee, 'concern': 'wealth and financial growth'},
-    {'label': 'Business', 'category': 'business', 'icon': Icons.storefront_outlined, 'concern': 'business and entrepreneurship'},
-    {'label': 'Children', 'category': 'children', 'icon': Icons.child_friendly_outlined, 'concern': 'children and family planning'},
-    {'label': 'Health', 'category': 'health', 'icon': Icons.health_and_safety_outlined, 'concern': 'health and wellbeing'},
-    {'label': 'Travel', 'category': 'travel', 'icon': Icons.flight_outlined, 'concern': 'travel and relocation prospects'},
+    {'label': 'Career', 'subtitle': 'Know your career potential', 'category': 'career', 'icon': Icons.work_outline, 'color': Color(0xFF4A7FE8), 'concern': 'career prospects and growth'},
+    {'label': 'Marriage', 'subtitle': 'Analyze marriage prospects', 'category': 'marriage', 'icon': Icons.favorite_outline, 'color': Color(0xFFE85D75), 'concern': 'marriage and relationships'},
+    {'label': 'Money', 'subtitle': 'Financial growth and stability', 'category': 'money', 'icon': Icons.currency_rupee, 'color': Color(0xFF2E9E5B), 'concern': 'wealth and financial growth'},
+    {'label': 'Business', 'subtitle': 'Business growth and profits', 'category': 'business', 'icon': Icons.storefront_outlined, 'color': Color(0xFFF5A623), 'concern': 'business and entrepreneurship'},
+    {'label': 'Children', 'subtitle': 'Child future and personality', 'category': 'children', 'icon': Icons.child_friendly_outlined, 'color': Color(0xFF9B6FE8), 'concern': 'children and family planning'},
+    {'label': 'Health', 'subtitle': 'Health insights and remedies', 'category': 'health', 'icon': Icons.health_and_safety_outlined, 'color': Color(0xFF3EBFB0), 'concern': 'health and wellbeing'},
+    {'label': 'Travel', 'subtitle': 'Travel timing and prospects', 'category': 'travel', 'icon': Icons.flight_outlined, 'color': Color(0xFFE8720C), 'concern': 'travel and relocation prospects'},
   ];
 
   @override
@@ -34,15 +34,17 @@ class ReportsScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.1,
+          childAspectRatio: 0.95,
         ),
         itemCount: _reportTypes.length,
         itemBuilder: (context, i) {
           final report = _reportTypes[i];
           return _ReportCard(
             label: report['label'] as String,
+            subtitle: report['subtitle'] as String,
             category: report['category'] as String,
             icon: report['icon'] as IconData,
+            color: report['color'] as Color,
             concern: report['concern'] as String,
           );
         },
@@ -53,10 +55,19 @@ class ReportsScreen extends StatelessWidget {
 
 class _ReportCard extends StatelessWidget {
   final String label;
+  final String subtitle;
   final String category;
   final IconData icon;
+  final Color color;
   final String concern;
-  const _ReportCard({required this.label, required this.category, required this.icon, required this.concern});
+  const _ReportCard({
+    required this.label,
+    required this.subtitle,
+    required this.category,
+    required this.icon,
+    required this.color,
+    required this.concern,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +81,27 @@ class _ReportCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: AppTheme.accentOrange),
-              const SizedBox(height: 10),
-              Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 22, color: color),
+              ),
+              const SizedBox(height: 12),
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),
