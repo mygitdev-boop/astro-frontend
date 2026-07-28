@@ -63,9 +63,33 @@ class _YogasDoshasScreenState extends State<YogasDoshasScreen> {
   }
 
   Widget _buildContent() {
+    final yogaCount = _yogas.where((y) => y['present'] == true).length;
+    final doshaCount = _doshas.where((d) => d['present'] == true).length;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _SummaryStat(icon: Icons.auto_awesome, count: yogaCount, label: 'Yogas Found'),
+              Container(width: 1, height: 40, color: Colors.white24),
+              _SummaryStat(icon: Icons.warning_amber_rounded, count: doshaCount, label: 'Doshas Found'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         if (_explanation != null) ...[
           Card(
             child: Padding(
@@ -102,6 +126,25 @@ class _YogasDoshasScreenState extends State<YogasDoshasScreen> {
   }
 }
 
+class _SummaryStat extends StatelessWidget {
+  final IconData icon;
+  final int count;
+  final String label;
+  const _SummaryStat({required this.icon, required this.count, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 22),
+        const SizedBox(height: 6),
+        Text('$count', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 11)),
+      ],
+    );
+  }
+}
+
 class _YogaDoshaTile extends StatelessWidget {
   final String name;
   final bool present;
@@ -127,10 +170,14 @@ class _YogaDoshaTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  present ? Icons.check_circle : Icons.remove_circle_outline,
-                  size: 18,
-                  color: present ? activeColor : AppTheme.textSecondary,
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: present ? activeColor.withValues(alpha: 0.12) : const Color(0xFFF0EEF5),
+                  child: Icon(
+                    present ? Icons.check_circle : Icons.remove_circle_outline,
+                    size: 15,
+                    color: present ? activeColor : AppTheme.textSecondary,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
