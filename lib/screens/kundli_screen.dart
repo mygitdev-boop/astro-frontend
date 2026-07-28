@@ -131,23 +131,102 @@ class _KundliScreenState extends State<KundliScreen> {
     );
   }
 
+  static const _planetIcons = {
+    'Sun': (Icons.wb_sunny, Color(0xFFE8720C)),
+    'Moon': (Icons.nightlight_round, Color(0xFF4A7FE8)),
+    'Mars': (Icons.local_fire_department, Color(0xFFD9531E)),
+    'Mercury': (Icons.eco, Color(0xFF2E9E5B)),
+    'Jupiter': (Icons.auto_awesome, Color(0xFFF5A623)),
+    'Venus': (Icons.favorite, Color(0xFFE85D9C)),
+    'Saturn': (Icons.hourglass_bottom, Color(0xFF5C6B7A)),
+    'Rahu': (Icons.blur_circular, Color(0xFF7E57A8)),
+    'Ketu': (Icons.blur_on, Color(0xFF8A7460)),
+  };
+
   Widget _buildContent() {
     final asc = _chart?['ascendant']?['sign'];
     final moon = _chart?['moon_sign']?['sign'];
     final nakshatra = _chart?['moon_sign']?['nakshatra'];
+    final planets = (_chart?['planets'] as Map?)?.cast<String, dynamic>() ?? {};
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Wrap(
-          spacing: 8,
-          children: [
-            if (asc != null) _ChartChip(label: '$asc ascendant'),
-            if (moon != null) _ChartChip(label: '$moon moon'),
-            if (nakshatra != null) _ChartChip(label: nakshatra),
-          ],
+        // --- Header: gradient card with the 3 core stats ---
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _HeaderStat(label: 'Ascendant', value: asc ?? '--'),
+              _HeaderStat(label: 'Moon Sign', value: moon ?? '--'),
+              _HeaderStat(label: 'Nakshatra', value: nakshatra ?? '--'),
+            ],
+          ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+
+        // --- Planet Positions grid ---
+        if (planets.isNotEmpty)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Planet Positions', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 14),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 3.2,
+                    children: planets.entries.map((e) {
+                      final info = e.value as Map<String, dynamic>;
+                      final iconData = _planetIcons[e.key];
+                      return Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: (iconData?.$2 ?? AppTheme.accentOrange).withValues(alpha: 0.12),
+                            child: Icon(iconData?.$1 ?? Icons.circle, size: 15, color: iconData?.$2 ?? AppTheme.accentOrange),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(e.key, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                Text(
+                                  '${info['sign'] ?? ''} · H${info['house'] ?? ''}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        const SizedBox(height: 16),
+
+        // --- AI explanation ---
         Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -155,83 +234,90 @@ class _KundliScreenState extends State<KundliScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _downloadPdf,
-          icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-          label: const Text('Download as PDF'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ReportsScreen()),
+
+        // --- More / navigation menu ---
+        Card(
+          child: Column(
+            children: [
+              _MenuTile(icon: Icons.picture_as_pdf_outlined, label: 'Download as PDF', onTap: _downloadPdf),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.description_outlined,
+                label: 'View detailed reports',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen())),
+              ),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.favorite_outline,
+                label: 'Check compatibility',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompatibilityScreen())),
+              ),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.auto_awesome_outlined,
+                label: 'View yogas & doshas',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const YogasDoshasScreen())),
+              ),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.grid_view_outlined,
+                label: 'Divisional charts (D9/D10)',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DivisionalChartsScreen())),
+              ),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.spa_outlined,
+                label: 'Remedies & timing',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RemediesScreen())),
+              ),
+              const Divider(height: 1),
+              _MenuTile(
+                icon: Icons.auto_stories_outlined,
+                label: 'Your birth story',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BirthStoryScreen())),
+              ),
+            ],
           ),
-          icon: const Icon(Icons.description_outlined, size: 18),
-          label: const Text('View detailed reports'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CompatibilityScreen()),
-          ),
-          icon: const Icon(Icons.favorite_outline, size: 18),
-          label: const Text('Check compatibility'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const YogasDoshasScreen()),
-          ),
-          icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-          label: const Text('View yogas & doshas'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const DivisionalChartsScreen()),
-          ),
-          icon: const Icon(Icons.grid_view_outlined, size: 18),
-          label: const Text('View divisional charts (D9/D10)'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const RemediesScreen()),
-          ),
-          icon: const Icon(Icons.spa_outlined, size: 18),
-          label: const Text('Remedies & timing'),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const BirthStoryScreen()),
-          ),
-          icon: const Icon(Icons.auto_stories_outlined, size: 18),
-          label: const Text('Your birth story'),
         ),
       ],
     );
   }
 }
 
-class _ChartChip extends StatelessWidget {
+class _HeaderStat extends StatelessWidget {
   final String label;
-  const _ChartChip({required this.label});
+  final String value;
+  const _HeaderStat({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppTheme.accentOrangeLight,
-        borderRadius: BorderRadius.circular(8),
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
+      ],
+    );
+  }
+}
+
+class _MenuTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _MenuTile({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 18,
+        backgroundColor: AppTheme.accentOrangeLight,
+        child: Icon(icon, size: 17, color: AppTheme.accentOrange),
       ),
-      child: Text(label, style: const TextStyle(color: AppTheme.warning, fontSize: 12, fontWeight: FontWeight.w500)),
+      title: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+      trailing: const Icon(Icons.chevron_right, size: 18),
+      onTap: onTap,
     );
   }
 }
