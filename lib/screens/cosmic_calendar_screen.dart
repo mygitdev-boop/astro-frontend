@@ -106,9 +106,40 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          'Traditional guidance on favorable windows this month -- not a guaranteed prediction.',
-          style: Theme.of(context).textTheme.bodySmall,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.primaryBrown, AppTheme.primaryBrownDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.calendar_month, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('This Month\'s Guidance', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Traditional guidance on favorable windows -- not a guaranteed prediction.',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         ..._categories.map((cat) {
@@ -121,7 +152,11 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(cat['icon'] as IconData, size: 20, color: AppTheme.accentOrange),
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: AppTheme.accentOrangeLight,
+                    child: Icon(cat['icon'] as IconData, size: 17, color: AppTheme.accentOrange),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
